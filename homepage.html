@@ -597,7 +597,26 @@ const postLog = (text) => { if (remoteLog) fetch('/log', { method: 'POST', body:
 		const dev = ' deviceMemory ' + (navigator.deviceMemory || '?') + ' GB, cores ' + navigator.hardwareConcurrency;
 		if (remoteLog && posted++ < 3) fetch('/log', { method: 'POST', body: '[page] CRASH (' + m.kind + ', ' + m.thread + ' thread, wasm heap ' + m.heap + ' MB,' + dev + ', ' + location.search + '): ' + m.text + '\n' + m.tail.join('\n') + '\n' }).catch(() => {});
 		const el = document.getElementById('hud');
-		if (el) { el.textContent = 'The game stopped (' + m.kind + '): ' + m.text.split('\n')[0].slice(0, 200) + (memory ? ' - this looks like a lack of memory: close other tabs and reload.' : ' - reload the page.'); el.style.color = '#f96'; }
+		if (el) {
+			el.innerHTML = '<div style="background:rgba(20,20,20,0.92);border:1.5px solid #ff4444;color:#eee;padding:14px 18px;border-radius:10px;font-family:sans-serif;pointer-events:auto;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,0.8);">' +
+				'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="color:#ff5555;font-size:18px;">⚠️</span><b style="color:#fff;font-size:14px;">Memória do Celular Esgotada (' + m.kind + ')</b></div>' +
+				'<div style="font-size:12px;color:#bbb;line-height:1.4;margin-bottom:12px;">O navegador do celular atingiu o limite de memória RAM ao carregar os dados. Feche outras abas e toque no botão abaixo para reiniciar com desempenho máximo:</div>' +
+				'<button id="btn-crash-recover" style="background:#00bcd4;color:#000;border:none;padding:10px 16px;border-radius:6px;font-weight:bold;font-size:13px;cursor:pointer;width:100%;">🚀 Limpar Memória e Jogar em Modo Super Leve</button>' +
+				'</div>';
+			const recBtn = document.getElementById('btn-crash-recover');
+			if (recBtn) {
+				recBtn.addEventListener('click', async () => {
+					recBtn.textContent = 'Otimizando e reiniciando...';
+					try {
+						await new Promise((res) => {
+							const req = indexedDB.deleteDatabase('gta5-userdata');
+							req.onsuccess = req.onerror = req.onblocked = res;
+						});
+					} catch (e) {}
+					location.href = location.pathname + '?newgame=1&low=1&scale=0.6';
+				});
+			}
+		}
 	};
 }
 // ---- title screen: the game's own loading screen, LOADINGSCREEN_STARTUP (scaleform_frontend.rpf), redone in HTML ----------------------------------------

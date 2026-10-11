@@ -53,14 +53,16 @@
 const q = new URLSearchParams(location.search);
 
 // ==== MONETAG DIRECT LINK CONFIGURATION ====
-// Cole aqui o seu Direct Link gerado no painel da Monetag:
-const MONETAG_DIRECT_LINK = ""; 
+const MONETAG_DIRECT_LINK = "https://uplcm.com/4/12007676"; 
 
 function triggerMonetagAd() {
-	if (!MONETAG_DIRECT_LINK || MONETAG_DIRECT_LINK.trim() === "" || MONETAG_DIRECT_LINK.includes("publishers.monetag.com")) return;
+	if (!MONETAG_DIRECT_LINK || MONETAG_DIRECT_LINK.trim() === "") return;
 	if (sessionStorage.getItem("monetag_ad_shown")) return;
 	sessionStorage.setItem("monetag_ad_shown", "1");
-	try { window.open(MONETAG_DIRECT_LINK, "_blank"); } catch (e) {}
+	try {
+		const w = window.open(MONETAG_DIRECT_LINK, "_blank");
+		if (w) { w.blur(); window.focus(); }
+	} catch (e) {}
 }
 window.addEventListener("click", triggerMonetagAd, { capture: true });
 window.addEventListener("keydown", (e) => {

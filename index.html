@@ -43,11 +43,215 @@
 	#fill { height: 100%; width: 0; background: #7cc576; }
 	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
 	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+
+	/* ==== FULLSCREEN BUTTON ==== */
+	#btn-fullscreen {
+		position: fixed;
+		top: 14px;
+		right: 14px;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		background: rgba(0, 0, 0, 0.55);
+		border: 1.5px solid rgba(255, 255, 255, 0.25);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		z-index: 100;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+		transition: transform .15s, background .15s;
+		user-select: none;
+		-webkit-user-select: none;
+		outline: none;
+	}
+	#btn-fullscreen:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.3); }
+
+	/* ==== TOUCH CONTROLS OVERLAY ==== */
+	#touch-controls {
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		z-index: 50;
+		user-select: none;
+		-webkit-user-select: none;
+		touch-action: none;
+	}
+	#touch-controls.hidden { display: none; }
+
+	/* Left Zone: Virtual Joystick */
+	#touch-left-zone {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 42vw;
+		height: 60vh;
+		pointer-events: auto;
+	}
+	#joystick-base {
+		position: absolute;
+		left: 36px;
+		bottom: 36px;
+		width: 130px;
+		height: 130px;
+		border-radius: 50%;
+		background: rgba(18, 18, 18, 0.42);
+		border: 2px solid rgba(255, 255, 255, 0.28);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+		touch-action: none;
+	}
+	#joystick-knob {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 52px;
+		height: 52px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.7);
+		border: 2px solid rgba(255, 255, 255, 0.9);
+		transform: translate(-50%, -50%);
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+		pointer-events: none;
+		transition: background .15s;
+	}
+
+	/* Right Zone: Camera Drag & Action Buttons */
+	#touch-right-zone {
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 58vw;
+		height: 100vh;
+		pointer-events: auto;
+	}
+
+	#touch-buttons-cluster {
+		position: absolute;
+		right: 24px;
+		bottom: 24px;
+		display: grid;
+		grid-template-columns: repeat(3, 62px);
+		grid-template-rows: repeat(2, 62px);
+		gap: 14px;
+		pointer-events: none;
+	}
+
+	.t-btn {
+		width: 62px;
+		height: 62px;
+		border-radius: 50%;
+		background: rgba(18, 18, 18, 0.45);
+		border: 1.8px solid rgba(255, 255, 255, 0.3);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: auto;
+		cursor: pointer;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+		transition: transform .1s, background .1s, border-color .1s;
+		touch-action: none;
+		outline: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.t-btn:active, .t-btn.active {
+		transform: scale(0.92);
+		background: rgba(255, 255, 255, 0.55);
+		border-color: #fff;
+		color: #000;
+	}
+	.t-btn-attack {
+		width: 70px;
+		height: 70px;
+		margin-top: -4px;
+		margin-left: -4px;
+		background: rgba(220, 50, 50, 0.5);
+		border-color: rgba(255, 120, 120, 0.65);
+	}
+	.t-btn-attack:active, .t-btn-attack.active {
+		background: rgba(240, 60, 60, 0.9);
+		color: #fff;
+	}
 </style>
 </head>
 <body>
 <canvas id="canvas" width="800" height="600" tabindex="-1"></canvas>
 <div id="hud"></div>
+
+<!-- Botão de Tela Cheia -->
+<button id="btn-fullscreen" title="Tela Cheia">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+  </svg>
+</button>
+
+<!-- Controles Virtuais Táteis para Celular -->
+<div id="touch-controls" class="hidden">
+  <div id="touch-left-zone">
+    <div id="joystick-base">
+      <div id="joystick-knob"></div>
+    </div>
+  </div>
+
+  <div id="touch-right-zone">
+    <div id="touch-buttons-cluster">
+      <!-- F - Entrar/Sair do Carro -->
+      <button class="t-btn" id="t-btn-car" title="Entrar/Sair do Carro (F)">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+        </svg>
+      </button>
+
+      <!-- Space - Pular / Freio de Mão -->
+      <button class="t-btn" id="t-btn-jump" title="Pular / Freio (Espaço)">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+      </button>
+
+      <!-- Aim - Mirar (Botão Direito) -->
+      <button class="t-btn" id="t-btn-aim" title="Mirar">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="8"/>
+          <line x1="12" y1="2" x2="12" y2="7"/>
+          <line x1="12" y1="17" x2="12" y2="22"/>
+          <line x1="2" y1="12" x2="7" y2="12"/>
+          <line x1="17" y1="12" x2="22" y2="12"/>
+          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+        </svg>
+      </button>
+
+      <!-- Shift - Correr (Sprint) -->
+      <button class="t-btn" id="t-btn-run" title="Correr (Shift)">
+        <svg viewBox="0 0 24 24" width="25" height="25" fill="currentColor">
+          <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.8-1.6 8.1 4.8 1.8z"/>
+        </svg>
+      </button>
+
+      <!-- R - Recarregar -->
+      <button class="t-btn" id="t-btn-reload" title="Recarregar (R)">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
+        </svg>
+      </button>
+
+      <!-- Soco / Atirar (Botão Esquerdo) -->
+      <button class="t-btn t-btn-attack" id="t-btn-attack" title="Atacar / Atirar">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+          <path d="M18.8 6.5C18.4 5.6 17.5 5 16.5 5c-.4 0-.8.1-1.1.3L15 4.8C14.6 4.3 14 4 13.3 4c-.5 0-1 .2-1.4.6L11.5 4.3C11.1 3.5 10.2 3 9.2 3c-1.3 0-2.3.9-2.5 2.1L6.2 9.5l-1.9-.9c-.6-.3-1.4-.2-1.9.3-.5.5-.7 1.3-.4 1.9l2.8 6.5C5.7 19.3 7.6 21 9.8 21h4.9c2.3 0 4.2-1.6 4.7-3.8l1.3-6.1c.2-.9-.2-1.8-.9-2.3l-1-.3z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="loading"><div id="ls-stage"><div id="ls-screens"></div><img id="ls-logo" src="/b/8b0b5899ed/title/logo.png" alt=""><div id="ls-bars"><div id="modes" class="ls-bar"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div class="ls-bar"><span id="label">Starting...</span><span id="pct">0%</span><i class="ls-spin"></i></div></div></div><div id="ls-log"><div id="data"></div><div id="console"></div></div><div id="bar"><div id="fill"></div></div></div>
 <div id="fps"></div>
 <script type="module">
@@ -662,6 +866,210 @@ function installInput(memory, block) {
 		const n = Math.trunc(wheelAccum);
 		if (n) { wheelAccum -= n; Atomics.add(w, DZ, n); }
 	}, { passive: false });
+
+	// Ativa controles táteis virtuais para celular
+	initTouchControls(keys, w, VK);
+}
+
+// ==== CONTROLES TÁTEIS PARA CELULAR & TELA CHEIA ====
+const fsBtn = document.getElementById('btn-fullscreen');
+if (fsBtn) {
+	fsBtn.addEventListener('click', (e) => {
+		e.preventDefault(); e.stopPropagation();
+		if (!document.fullscreenElement) {
+			document.documentElement.requestFullscreen().catch(() => {});
+		} else {
+			document.exitFullscreen().catch(() => {});
+		}
+	});
+}
+
+function initTouchControls(keys, w, VK) {
+	const touchEl = document.getElementById('touch-controls');
+	if (!touchEl) return;
+
+	const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
+	if (isTouch) {
+		touchEl.classList.remove('hidden');
+	}
+
+	Atomics.store(w, 6, 1); // FOCUS
+
+	// --- 1. Joystick Analógico Virtual (W, A, S, D) ---
+	const base = document.getElementById('joystick-base');
+	const knob = document.getElementById('joystick-knob');
+	let joyTouchId = null;
+	let joyCenterX = 0, joyCenterY = 0;
+	const maxRadius = 45;
+
+	const resetJoystick = () => {
+		joyTouchId = null;
+		knob.style.transform = 'translate(-50%, -50%)';
+		Atomics.store(keys, VK['KeyW'], 0);
+		Atomics.store(keys, VK['KeyS'], 0);
+		Atomics.store(keys, VK['KeyA'], 0);
+		Atomics.store(keys, VK['KeyD'], 0);
+	};
+
+	base.addEventListener('touchstart', (e) => {
+		e.preventDefault();
+		if (joyTouchId !== null) return;
+		const touch = e.changedTouches[0];
+		joyTouchId = touch.identifier;
+		const rect = base.getBoundingClientRect();
+		joyCenterX = rect.left + rect.width / 2;
+		joyCenterY = rect.top + rect.height / 2;
+		updateJoystick(touch.clientX, touch.clientY);
+	}, { passive: false });
+
+	const updateJoystick = (clientX, clientY) => {
+		const dx = clientX - joyCenterX;
+		const dy = clientY - joyCenterY;
+		const dist = Math.hypot(dx, dy);
+		const clampedDist = Math.min(dist, maxRadius);
+		const angle = Math.atan2(dy, dx);
+		const knobX = Math.cos(angle) * clampedDist;
+		const knobY = Math.sin(angle) * clampedDist;
+
+		knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+
+		const deadzone = 12;
+		if (dist > deadzone) {
+			Atomics.store(keys, VK['KeyW'], dy < -16 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyS'], dy > 16 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyA'], dx < -16 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyD'], dx > 16 ? 0x80 : 0);
+		} else {
+			Atomics.store(keys, VK['KeyW'], 0);
+			Atomics.store(keys, VK['KeyS'], 0);
+			Atomics.store(keys, VK['KeyA'], 0);
+			Atomics.store(keys, VK['KeyD'], 0);
+		}
+	};
+
+	window.addEventListener('touchmove', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+			if (touch.identifier === joyTouchId) {
+				e.preventDefault();
+				updateJoystick(touch.clientX, touch.clientY);
+				break;
+			}
+		}
+	}, { passive: false });
+
+	window.addEventListener('touchend', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === joyTouchId) {
+				resetJoystick();
+				break;
+			}
+		}
+	});
+	window.addEventListener('touchcancel', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === joyTouchId) {
+				resetJoystick();
+				break;
+			}
+		}
+	});
+
+	// --- 2. Controle de Câmera (Deslizar o dedo na metade direita) ---
+	const rightZone = document.getElementById('touch-right-zone');
+	let camTouchId = null;
+	let lastCamX = 0, lastCamY = 0;
+	const SENSITIVITY = 1.8;
+
+	rightZone.addEventListener('touchstart', (e) => {
+		if (e.target.closest('.t-btn')) return;
+		e.preventDefault();
+		if (camTouchId !== null) return;
+		const touch = e.changedTouches[0];
+		camTouchId = touch.identifier;
+		lastCamX = touch.clientX;
+		lastCamY = touch.clientY;
+		Atomics.store(w, 6, 1);
+		Atomics.store(w, 7, 1);
+	}, { passive: false });
+
+	window.addEventListener('touchmove', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+			if (touch.identifier === camTouchId) {
+				e.preventDefault();
+				const deltaX = (touch.clientX - lastCamX) * SENSITIVITY;
+				const deltaY = (touch.clientY - lastCamY) * SENSITIVITY;
+				lastCamX = touch.clientX;
+				lastCamY = touch.clientY;
+				Atomics.add(w, 2, Math.round(deltaX));
+				Atomics.add(w, 3, Math.round(deltaY));
+				break;
+			}
+		}
+	}, { passive: false });
+
+	window.addEventListener('touchend', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === camTouchId) {
+				camTouchId = null;
+				break;
+			}
+		}
+	});
+
+	// --- 3. Vinculação dos Botões Táteis ---
+	const bindKey = (id, vkCode) => {
+		const btn = document.getElementById(id);
+		if (!btn) return;
+		btn.addEventListener('touchstart', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			btn.classList.add('active');
+			Atomics.store(keys, vkCode, 0x80);
+		}, { passive: false });
+		const endPress = (e) => {
+			e.preventDefault(); e.stopPropagation();
+			btn.classList.remove('active');
+			Atomics.store(keys, vkCode, 0);
+		};
+		btn.addEventListener('touchend', endPress, { passive: false });
+		btn.addEventListener('touchcancel', endPress, { passive: false });
+	};
+
+	bindKey('t-btn-car', VK['KeyF']);
+	bindKey('t-btn-run', VK['ShiftLeft']);
+	bindKey('t-btn-jump', VK['Space']);
+	bindKey('t-btn-reload', VK['KeyR']);
+
+	// Soco / Atirar (Botão Esquerdo)
+	const attackBtn = document.getElementById('t-btn-attack');
+	if (attackBtn) {
+		attackBtn.addEventListener('touchstart', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			attackBtn.classList.add('active');
+			Atomics.or(w, 5, 1);
+		}, { passive: false });
+		const endAttack = (e) => {
+			e.preventDefault(); e.stopPropagation();
+			attackBtn.classList.remove('active');
+			Atomics.and(w, 5, ~1);
+		};
+		attackBtn.addEventListener('touchend', endAttack, { passive: false });
+		attackBtn.addEventListener('touchcancel', endAttack, { passive: false });
+	}
+
+	// Mirar (Botão Direito - Alternância de mira)
+	const aimBtn = document.getElementById('t-btn-aim');
+	if (aimBtn) {
+		let isAiming = false;
+		aimBtn.addEventListener('touchstart', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			isAiming = !isAiming;
+			aimBtn.classList.toggle('active', isAiming);
+			if (isAiming) Atomics.or(w, 5, 2);
+			else Atomics.and(w, 5, ~2);
+		}, { passive: false });
+	}
 }
 </script>
 </body>

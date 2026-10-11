@@ -2723,7 +2723,8 @@ async function present(id) {
 		if (!worldSent && (worldSince || d > 300)) {
 			if (!worldSince) { worldSince = now; worldSkips0 = pendingSkips; }
 			if (pendingSkips !== skipsAtPresent) worldClean = 0; else if (!worldClean) worldClean = now;
-			if ((worldClean && now - worldClean >= 1500) || now - worldSince >= 60000) {
+			const maxWait = (new URLSearchParams(self.location.search).get('low') === '1' || isNode) ? 2000 : 4000;
+			if ((worldClean && now - worldClean >= 600) || now - worldSince >= maxWait) {
 				worldSent = true;
 				logLine('world shown: title screen held ' + ((now - worldSince) / 1000).toFixed(1) + ' s for compiling pipelines (' + (pendingSkips - worldSkips0) + ' draws skipped meanwhile, ' + pipelinesPending + ' still compiling); compiled ahead ' + aheadMade + ', used ' + aheadUsed + ', compiled when first drawn ' + pipeCreates + '; shader variants for the inter-stage limit: ' + remapVariants[0] + ' vertex, ' + remapVariants[1] + ' pixel');
 				if (!isNode) progressChannel.postMessage({ pct: 100, label: 'Ready', world: true });

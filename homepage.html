@@ -827,8 +827,27 @@ showModes();
 		if (m.choice && !startMode) { waitingChoice = true; modesEl.classList.add('ask'); showModes(); }		// the engine waits for the choice: showModes asks for it in the label
 		if (m.commit) { startCommitted = true; pickingMap = false; if (m.mode) startMode = m.mode; showModes(); }		// the engine took the choice
 		if (m.compiling !== undefined && !waitingChoice) { label.textContent = lastLabel = 'Preparing shaders'; target = Math.max(target, 99); }		// the world is up; the GPU worker holds it until its pipelines are compiled
-		if (m.world) { ready = true; hud.textContent = 'click the game to capture the mouse (Esc releases it, Shift+P switches keyboard mode, = shows FPS)'; setTimeout(() => { hud.textContent = ''; }, 15000); }
+		if (m.world) {
+			ready = true;
+			hud.textContent = 'click the game to capture the mouse (Esc releases it, Shift+P switches keyboard mode, = shows FPS)';
+			setTimeout(() => { hud.textContent = ''; }, 15000);
+			dismissLoading();
+		}
 	};
+	// DismissLoading imediato para nunca reter a tela de carregamento cobrindo a gameplay
+	function dismissLoading() {
+		if (loadingGone) return;
+		loadingGone = true;
+		clearInterval(progressTimer);
+		loading.classList.add('done');
+		loading.style.opacity = '0';
+		loading.style.pointerEvents = 'none';
+		setTimeout(() => {
+			if (loading.parentNode) loading.remove();
+			stopTitle();
+		}, 300);
+	}
+	window.__dismissLoading = dismissLoading;
 	// Between reports the bar creeps forward (at most 6 points past the last report) so a long stage does not look frozen.
 	const dataEl = document.getElementById('data');
 	const WORLD_BYTES = 1.2e9;		// game data the world needs after the scripts start (measured: about 1.2-1.4 GB the first time)
@@ -875,7 +894,7 @@ showModes();
 		}
 		fill.style.width = shown.toFixed(1) + '%';
 		pct.textContent = Math.round(shown) + '%';
-		if (ready && shown > 99.5) { loading.classList.add('done'); setTimeout(() => { loading.remove(); stopTitle(); }, 1000); loadingGone = true; clearInterval(progressTimer); }		// once: the page does no loading-screen work during play
+		if (ready || shown > 99.5) { dismissLoading(); }
 	}, 50);
 }
 const hud = document.getElementById('hud');
@@ -1033,6 +1052,7 @@ function tryStartAudio() {
 			const node = new AudioWorkletNode(ctx, 'game-audio', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: audioPending });
 			node.connect(ctx.destination);
 			await ctx.resume();
+			if (typeof window.__dismissLoading === 'function') window.__dismissLoading();
 			addEventListener('pointerdown', () => ctx.resume());
 			addEventListener('keydown', () => ctx.resume());
 			if (q.get('mem')) {		// diagnostics: ring state every 5 s
@@ -1206,6 +1226,9 @@ function initTouchControls(keys, w, VK) {
 	const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
 	if (isTouch) {
 		touchEl.classList.remove('hidden');
+		touchEl.addEventListener('touchstart', () => {
+			if (typeof window.__dismissLoading === 'function') window.__dismissLoading();
+		}, { passive: true, capture: true });
 	}
 
 	Atomics.store(w, 6, 1); // FOCUS

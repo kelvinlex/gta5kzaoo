@@ -1203,7 +1203,7 @@ function installInput(memory, block) {
 	}, { passive: false });
 
 	// Ativa controles táteis virtuais para celular
-	initTouchControls(keys, w, VK);
+	initTouchControls(keys, w, VK, U16);
 }
 
 // ==== CONTROLES TÁTEIS PARA CELULAR & TELA CHEIA ====
@@ -1219,7 +1219,7 @@ if (fsBtn) {
 	});
 }
 
-function initTouchControls(keys, w, VK) {
+function initTouchControls(keys, w, VK, U16) {
 	const touchEl = document.getElementById('touch-controls');
 	if (!touchEl) return;
 
@@ -1233,14 +1233,37 @@ function initTouchControls(keys, w, VK) {
 
 	Atomics.store(w, 6, 1); // FOCUS
 
+	const sendKeyPulse = (vkCode, charCode = null) => {
+		Atomics.store(w, 6, 1); // FOCUS
+		if (vkCode) Atomics.store(keys, vkCode, 0x80);
+		if (charCode !== null) {
+			const head = Atomics.load(w, 8); // HEAD
+			if (((head - Atomics.load(w, 9)) >>> 0) < 64) {
+				U16[head & 63] = charCode;
+				Atomics.store(w, 8, (head + 1) | 0);
+			}
+		}
+		setTimeout(() => {
+			if (vkCode) Atomics.store(keys, vkCode, 0);
+		}, 120);
+	};
+
 	// Helper para vincular botões do gamepad a teclas virtuais do GTA V
-	const bindKey = (id, vkCode) => {
+	const bindKey = (id, vkCode, charCode = null) => {
 		const btn = document.getElementById(id);
 		if (!btn) return;
 		btn.addEventListener('touchstart', (e) => {
 			e.preventDefault(); e.stopPropagation();
 			btn.classList.add('active');
+			Atomics.store(w, 6, 1); // FOCUS
 			Atomics.store(keys, vkCode, 0x80);
+			if (charCode !== null) {
+				const head = Atomics.load(w, 8); // HEAD
+				if (((head - Atomics.load(w, 9)) >>> 0) < 64) {
+					U16[head & 63] = charCode;
+					Atomics.store(w, 8, (head + 1) | 0);
+				}
+			}
 		}, { passive: false });
 		const endPress = (e) => {
 			e.preventDefault(); e.stopPropagation();
@@ -1251,11 +1274,26 @@ function initTouchControls(keys, w, VK) {
 		btn.addEventListener('touchcancel', endPress, { passive: false });
 	};
 
+	// Auto-skip disclaimer / telas de inicialização no celular (envia Enter/Espaço/A nos primeiros 20 segundos)
+	let autoSkipCount = 0;
+	const autoSkipTimer = setInterval(() => {
+		autoSkipCount++;
+		sendKeyPulse(VK['Enter'], 13);
+		sendKeyPulse(VK['Space'], 32);
+		sendKeyPulse(VK['ShiftLeft']);
+		if (autoSkipCount > 25) clearInterval(autoSkipTimer);
+	}, 1200);
+
+	// Toque em qualquer lugar da tela também envia confirmação se o jogo estiver aguardando
+	window.addEventListener('touchstart', (e) => {
+		sendKeyPulse(VK['Enter'], 13);
+	}, { passive: true, capture: true });
+
 	// 1. Cluster de Ação ABXY
-	bindKey('pad-btn-y', VK['KeyF']);       // Y: Entrar / Sair do veículo
-	bindKey('pad-btn-x', VK['Space']);      // X: Pular / Escalar
-	bindKey('pad-btn-b', VK['KeyR']);       // B: Recarregar / Freio
-	bindKey('pad-btn-a', VK['ShiftLeft']);  // A: Correr (Sprint)
+	bindKey('pad-btn-y', VK['KeyF']);                    // Y: Entrar / Sair do veículo
+	bindKey('pad-btn-x', VK['Space'], 32);              // X: Pular / Escalar / Confirmar
+	bindKey('pad-btn-b', VK['KeyR']);                    // B: Recarregar / Freio
+	bindKey('pad-btn-a', VK['ShiftLeft'], 13);           // A: Correr (Sprint) / Confirmar (Enter)
 
 	// 2. Bumpers LB e RB
 	bindKey('pad-btn-lb', VK['Tab']);       // LB: Roda de armas

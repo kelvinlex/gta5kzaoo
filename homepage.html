@@ -56,22 +56,65 @@
 // Query string: ?args=-flag1,-flag2=value (added to the engine command line), ?shot=N (screenshot of every N-th present to the dev server).
 const q = new URLSearchParams(location.search);
 
-// ==== MONETAG DIRECT LINK CONFIGURATION ====
+// ==== MONETAG INTELLIGENT STRATEGIC AD SYSTEM ====
 const MONETAG_DIRECT_LINK = "https://uplcm.com/4/12007676"; 
+let lastAdTime = 0;
+const AD_COOLDOWN_MS = 3.5 * 60 * 1000; // 3.5 minutos entre anúncios para maximizar ganhos
+let pendingDeathAd = false;
 
-function triggerMonetagAd() {
+function triggerMonetagAd(reason = 'general') {
 	if (!MONETAG_DIRECT_LINK || MONETAG_DIRECT_LINK.trim() === "") return;
-	if (sessionStorage.getItem("monetag_ad_shown")) return;
-	sessionStorage.setItem("monetag_ad_shown", "1");
+	const now = Date.now();
+	// Primeiro anúncio sempre libera no início; anúncios seguintes respeitam o intervalo ou evento de morte
+	if (lastAdTime > 0 && (now - lastAdTime) < AD_COOLDOWN_MS && !pendingDeathAd) {
+		return;
+	}
+	lastAdTime = now;
+	pendingDeathAd = false;
 	try {
 		const w = window.open(MONETAG_DIRECT_LINK, "_blank");
 		if (w) { w.blur(); window.focus(); }
 	} catch (e) {}
 }
-window.addEventListener("click", triggerMonetagAd, { capture: true });
-window.addEventListener("keydown", (e) => {
-	if (e.code === "Enter" || e.code === "Space") triggerMonetagAd();
+
+// 1. Gatilho Inicial: Primeiro clique ou botão pressionado para iniciar
+window.addEventListener("click", () => {
+	if (lastAdTime === 0) triggerMonetagAd("first_click");
 }, { capture: true });
+window.addEventListener("keydown", (e) => {
+	if (lastAdTime === 0 && (e.code === "Enter" || e.code === "Space")) {
+		triggerMonetagAd("first_key");
+	}
+}, { capture: true });
+
+// 2. Gatilho de Morte / Wasted / Respawn detectado via logs de eventos do jogo
+try {
+	new BroadcastChannel('game-log').onmessage = (ev) => {
+		const text = typeof ev.data === 'string' ? ev.data.toLowerCase() : '';
+		if (text.includes('wasted') || text.includes('died') || text.includes('death') || text.includes('busted') || text.includes('failed') || text.includes('respawn')) {
+			pendingDeathAd = true;
+		}
+	};
+} catch (e) {}
+
+// 3. Gatilho Estratégico de Despausar / Morte: quando o jogador clica para voltar a mirar
+document.addEventListener('pointerlockchange', () => {
+	const isLocked = document.pointerLockElement !== null;
+	if (isLocked) {
+		const now = Date.now();
+		if (pendingDeathAd || (now - lastAdTime >= AD_COOLDOWN_MS)) {
+			triggerMonetagAd(pendingDeathAd ? "after_death" : "timer_cooldown");
+		}
+	}
+});
+
+// 4. Temporizador de checagem periódico (rearma anúncio no menu/pausa após 3.5 minutos)
+setInterval(() => {
+	const now = Date.now();
+	if (document.pointerLockElement === null && (now - lastAdTime >= AD_COOLDOWN_MS)) {
+		pendingDeathAd = true;
+	}
+}, 30000);
 
 // URL prefix of everything this page loads (loader, workers, engine, shaders, title art): empty on the dev server; on the PHP host (phase3/host/index.php) it puts the page's own
 // text `/b/8b0b5899ed` through str_replace to `/b/<build id>`, so those files are cached for ever under URLs that change when the build does.

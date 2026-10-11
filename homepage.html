@@ -103,114 +103,258 @@
 	}
 	#btn-fullscreen:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.3); }
 
-	/* ==== TOUCH CONTROLS OVERLAY ==== */
+	/* ==== TOUCH CONTROLS GAMEPAD OVERLAY (EXACT REFERENCE DESIGN) ==== */
 	#touch-controls {
 		position: fixed;
 		inset: 0;
 		pointer-events: none;
-		z-index: 50;
+		z-index: 60;
 		user-select: none;
 		-webkit-user-select: none;
 		touch-action: none;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	}
 	#touch-controls.hidden { display: none; }
 
-	/* Left Zone: Virtual Joystick */
-	#touch-left-zone {
+	/* Topo Esquerdo: Config & Teclado */
+	.pad-top-bar-left {
 		position: absolute;
-		left: 0;
-		bottom: 0;
-		width: 42vw;
-		height: 60vh;
+		top: 14px;
+		left: 18px;
+		display: flex;
+		gap: 16px;
 		pointer-events: auto;
+		z-index: 10;
 	}
-	#joystick-base {
-		position: absolute;
-		left: 36px;
-		bottom: 36px;
-		width: 130px;
-		height: 130px;
-		border-radius: 50%;
-		background: rgba(18, 18, 18, 0.42);
-		border: 2px solid rgba(255, 255, 255, 0.28);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
-		touch-action: none;
+	.pad-icon-btn {
+		background: none;
+		border: none;
+		color: rgba(220, 225, 230, 0.65);
+		cursor: pointer;
+		padding: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform .1s, color .1s;
+		outline: none;
+		-webkit-tap-highlight-color: transparent;
 	}
-	#joystick-knob {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		width: 52px;
-		height: 52px;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.7);
-		border: 2px solid rgba(255, 255, 255, 0.9);
-		transform: translate(-50%, -50%);
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-		pointer-events: none;
-		transition: background .15s;
-	}
-
-	/* Right Zone: Camera Drag & Action Buttons */
-	#touch-right-zone {
-		position: absolute;
-		right: 0;
-		top: 0;
-		width: 58vw;
-		height: 100vh;
-		pointer-events: auto;
-	}
-
-	#touch-buttons-cluster {
-		position: absolute;
-		right: 24px;
-		bottom: 24px;
-		display: grid;
-		grid-template-columns: repeat(3, 62px);
-		grid-template-rows: repeat(2, 62px);
-		gap: 14px;
-		pointer-events: none;
-	}
-
-	.t-btn {
-		width: 62px;
-		height: 62px;
-		border-radius: 50%;
-		background: rgba(18, 18, 18, 0.45);
-		border: 1.8px solid rgba(255, 255, 255, 0.3);
+	.pad-icon-btn:active {
+		transform: scale(0.9);
 		color: #fff;
+	}
+
+	/* Gatilhos Superiores LT e RT (Formato Ergonômico de Gatilho de Controle) */
+	.pad-trigger {
+		position: absolute;
+		top: clamp(65px, 12vh, 95px);
+		width: 58px;
+		height: 74px;
+		pointer-events: auto;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: rgba(220, 225, 230, 0.7);
+		transition: transform .1s, color .1s;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.pad-trigger-lt { left: clamp(16px, 4.5vw, 48px); }
+	.pad-trigger-rt { right: clamp(16px, 4.5vw, 48px); }
+
+	.pad-trigger svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+	.pad-trigger span {
+		position: relative;
+		font-size: 22px;
+		font-weight: 800;
+		letter-spacing: -0.5px;
+		pointer-events: none;
+	}
+	.pad-trigger:active, .pad-trigger.active {
+		transform: scale(0.92);
+		color: #fff;
+	}
+	.pad-trigger:active svg path, .pad-trigger.active svg path {
+		stroke: #fff;
+		fill: rgba(255, 255, 255, 0.22);
+	}
+
+	/* Bumpers Superiores LB e RB (Formato Bumper Arredondado Horizontal) */
+	.pad-bumper {
+		position: absolute;
+		top: clamp(80px, 15vh, 110px);
+		width: 70px;
+		height: 40px;
+		border: 3.2px solid rgba(220, 225, 230, 0.7);
+		border-radius: 13px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 19px;
+		font-weight: 800;
+		color: rgba(220, 225, 230, 0.75);
+		pointer-events: auto;
+		cursor: pointer;
+		background: rgba(255, 255, 255, 0.04);
+		transition: transform .1s, color .1s, border-color .1s, background .1s;
+		box-sizing: border-box;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.pad-bumper-lb { left: clamp(84px, 14vw, 126px); }
+	.pad-bumper-rb { right: clamp(84px, 14vw, 126px); }
+
+	.pad-bumper:active, .pad-bumper.active {
+		transform: scale(0.92);
+		border-color: #fff;
+		color: #fff;
+		background: rgba(255, 255, 255, 0.28);
+	}
+
+	/* Analógicos Virtuais (L-Stick e R-Stick) com os 4 pontos característicos */
+	.pad-stick {
+		position: absolute;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.22);
+		border: 2px solid rgba(255, 255, 255, 0.35);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		pointer-events: auto;
-		cursor: pointer;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-		transition: transform .1s, background .1s, border-color .1s;
 		touch-action: none;
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+	}
+	#pad-stick-left {
+		left: clamp(24px, 7vw, 68px);
+		top: 50%;
+		transform: translateY(-50%);
+		width: 76px;
+		height: 76px;
+	}
+	#pad-stick-right {
+		right: clamp(190px, 28vw, 250px);
+		bottom: clamp(30px, 7vh, 60px);
+		width: 66px;
+		height: 66px;
+	}
+	.pad-stick-knob {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+	}
+	.stick-dot {
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: rgba(0, 0, 0, 0.45);
+	}
+	.dot-t { top: 9px; left: calc(50% - 3px); }
+	.dot-b { bottom: 9px; left: calc(50% - 3px); }
+	.dot-l { left: 9px; top: calc(50% - 3px); }
+	.dot-r { right: 9px; top: calc(50% - 3px); }
+
+	/* Centro Inferior (Botões View e Menu) */
+	.pad-center-bottom {
+		position: absolute;
+		bottom: 18px;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		gap: 16px;
+		pointer-events: auto;
+	}
+
+	/* Botões Redondos Estilo Contorno Outline */
+	.pad-round-btn {
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.04);
+		border: 3.5px solid rgba(220, 225, 230, 0.7);
+		color: rgba(220, 225, 230, 0.85);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		pointer-events: auto;
 		outline: none;
 		-webkit-tap-highlight-color: transparent;
+		transition: transform .08s, background .08s, border-color .08s, color .08s;
+		box-sizing: border-box;
 	}
-	.t-btn:active, .t-btn.active {
+	.pad-round-btn:active, .pad-round-btn.active {
 		transform: scale(0.92);
-		background: rgba(255, 255, 255, 0.55);
+		background: rgba(255, 255, 255, 0.32);
 		border-color: #fff;
-		color: #000;
-	}
-	.t-btn-attack {
-		width: 70px;
-		height: 70px;
-		margin-top: -4px;
-		margin-left: -4px;
-		background: rgba(220, 50, 50, 0.5);
-		border-color: rgba(255, 120, 120, 0.65);
-	}
-	.t-btn-attack:active, .t-btn-attack.active {
-		background: rgba(240, 60, 60, 0.9);
 		color: #fff;
+	}
+	.pad-btn-small {
+		width: 48px;
+		height: 48px;
+		border-width: 2.8px;
+	}
+
+	/* Cluster de Ação ABXY em Diamante (Cruz Clássica de Xbox) */
+	.pad-abxy-diamond {
+		position: absolute;
+		right: clamp(16px, 4vw, 42px);
+		bottom: clamp(30px, 8vh, 70px);
+		width: 172px;
+		height: 172px;
+		pointer-events: none;
+	}
+	.pad-abxy-diamond .pad-round-btn {
+		position: absolute;
+		width: 55px;
+		height: 55px;
+		font-size: 25px;
+		font-weight: 800;
+		letter-spacing: -0.5px;
+	}
+	.pad-btn-y {
+		top: 0;
+		left: 58px;
+	}
+	.pad-btn-x {
+		top: 58px;
+		left: 0;
+	}
+	.pad-btn-b {
+		top: 58px;
+		right: 0;
+	}
+	.pad-btn-a {
+		bottom: 0;
+		left: 58px;
+	}
+
+	/* Zonas de Toque Ergonômicas */
+	#touch-left-zone {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 45vw;
+		height: 80vh;
+		pointer-events: auto;
+	}
+	#touch-right-zone {
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 55vw;
+		height: 100vh;
+		pointer-events: auto;
 	}
 </style>
 </head>
@@ -254,61 +398,115 @@
   </div>
 </div>
 
-<!-- Controles Virtuais Táteis para Celular -->
+<!-- Controles Táteis Estilo Gamepad Nativo (Idêntico à Imagem de Referência) -->
 <div id="touch-controls" class="hidden">
+  <!-- Topo Esquerdo: Configurações e Teclado -->
+  <div class="pad-top-bar-left">
+    <button class="pad-icon-btn" id="pad-btn-settings" title="Configurações">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <button class="pad-icon-btn" id="pad-btn-keyboard" title="Teclado">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <line x1="6" y1="8" x2="6.01" y2="8"/>
+        <line x1="10" y1="8" x2="10.01" y2="8"/>
+        <line x1="14" y1="8" x2="14.01" y2="8"/>
+        <line x1="18" y1="8" x2="18.01" y2="8"/>
+        <line x1="6" y1="12" x2="6.01" y2="12"/>
+        <line x1="10" y1="12" x2="10.01" y2="12"/>
+        <line x1="14" y1="12" x2="14.01" y2="12"/>
+        <line x1="18" y1="12" x2="18.01" y2="12"/>
+        <line x1="7" y1="16" x2="17" y2="16"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Topo Esquerdo: Gatilho LT e Bumper LB -->
+  <div class="pad-trigger pad-trigger-lt" id="pad-btn-lt" title="Mirar (LT)">
+    <svg viewBox="0 0 64 80">
+      <path d="M 12 6 C 28 6, 48 8, 52 14 C 56 22, 54 44, 46 62 C 42 70, 32 76, 20 74 C 10 72, 6 62, 6 48 C 6 30, 8 10, 12 6 Z" fill="rgba(255,255,255,0.04)" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round"/>
+    </svg>
+    <span>LT</span>
+  </div>
+  <div class="pad-bumper pad-bumper-lb" id="pad-btn-lb" title="Armas (LB)">
+    <span>LB</span>
+  </div>
+
+  <!-- Analógico Esquerdo L-Stick -->
   <div id="touch-left-zone">
-    <div id="joystick-base">
-      <div id="joystick-knob"></div>
+    <div id="pad-stick-left" class="pad-stick">
+      <div id="pad-stick-knob-left" class="pad-stick-knob">
+        <span class="stick-dot dot-t"></span>
+        <span class="stick-dot dot-b"></span>
+        <span class="stick-dot dot-l"></span>
+        <span class="stick-dot dot-r"></span>
+      </div>
     </div>
   </div>
 
+  <!-- Centro Inferior: View e Menu -->
+  <div class="pad-center-bottom">
+    <button class="pad-round-btn pad-btn-small" id="pad-btn-view" title="Mudar Câmera (View)">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="8" width="11" height="11" rx="1.5"/>
+        <path d="M8 4h10a1.5 1.5 0 0 1 1.5 1.5V15"/>
+      </svg>
+    </button>
+    <button class="pad-round-btn pad-btn-small" id="pad-btn-menu" title="Pausa / Mapa (Menu)">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Topo Direito: Bumper RB e Gatilho RT -->
+  <div class="pad-bumper pad-bumper-rb" id="pad-btn-rb" title="Cobertura / Freio (RB)">
+    <span>RB</span>
+  </div>
+  <div class="pad-trigger pad-trigger-rt" id="pad-btn-rt" title="Atirar / Bater (RT)">
+    <svg viewBox="0 0 64 80">
+      <path d="M 52 6 C 36 6, 16 8, 12 14 C 8 22, 10 44, 18 62 C 22 70, 32 76, 44 74 C 54 72, 58 62, 58 48 C 58 30, 56 10, 52 6 Z" fill="rgba(255,255,255,0.04)" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round"/>
+    </svg>
+    <span>RT</span>
+  </div>
+
+  <!-- Área Direita: Câmera livre, Analógico Direito (R-Stick) e Cluster ABXY -->
   <div id="touch-right-zone">
-    <div id="touch-buttons-cluster">
-      <!-- F - Entrar/Sair do Carro -->
-      <button class="t-btn" id="t-btn-car" title="Entrar/Sair do Carro (F)">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-        </svg>
+    <!-- Analógico Direito (R-Stick) com os 4 pontos -->
+    <div id="pad-stick-right" class="pad-stick">
+      <div id="pad-stick-knob-right" class="pad-stick-knob">
+        <span class="stick-dot dot-t"></span>
+        <span class="stick-dot dot-b"></span>
+        <span class="stick-dot dot-l"></span>
+        <span class="stick-dot dot-r"></span>
+      </div>
+    </div>
+
+    <!-- Cluster ABXY em Diamante -->
+    <div class="pad-abxy-diamond">
+      <!-- Y (Topo) - Entrar no Carro (F) -->
+      <button class="pad-round-btn pad-btn-y" id="pad-btn-y" title="Entrar no Carro (Y)">
+        <span>Y</span>
       </button>
 
-      <!-- Space - Pular / Freio de Mão -->
-      <button class="t-btn" id="t-btn-jump" title="Pular / Freio (Espaço)">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 19V5M5 12l7-7 7 7"/>
-        </svg>
+      <!-- X (Esquerda) - Pular / Escalar (Espaço) -->
+      <button class="pad-round-btn pad-btn-x" id="pad-btn-x" title="Pular / Escalar (X)">
+        <span>X</span>
       </button>
 
-      <!-- Aim - Mirar (Botão Direito) -->
-      <button class="t-btn" id="t-btn-aim" title="Mirar">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="8"/>
-          <line x1="12" y1="2" x2="12" y2="7"/>
-          <line x1="12" y1="17" x2="12" y2="22"/>
-          <line x1="2" y1="12" x2="7" y2="12"/>
-          <line x1="17" y1="12" x2="22" y2="12"/>
-          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
-        </svg>
+      <!-- B (Direita) - Recarregar / Freio (B) -->
+      <button class="pad-round-btn pad-btn-b" id="pad-btn-b" title="Recarregar / Freio (B)">
+        <span>B</span>
       </button>
 
-      <!-- Shift - Correr (Sprint) -->
-      <button class="t-btn" id="t-btn-run" title="Correr (Shift)">
-        <svg viewBox="0 0 24 24" width="25" height="25" fill="currentColor">
-          <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.8-1.6 8.1 4.8 1.8z"/>
-        </svg>
-      </button>
-
-      <!-- R - Recarregar -->
-      <button class="t-btn" id="t-btn-reload" title="Recarregar (R)">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
-        </svg>
-      </button>
-
-      <!-- Soco / Atirar (Botão Esquerdo) -->
-      <button class="t-btn t-btn-attack" id="t-btn-attack" title="Atacar / Atirar">
-        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
-          <path d="M18.8 6.5C18.4 5.6 17.5 5 16.5 5c-.4 0-.8.1-1.1.3L15 4.8C14.6 4.3 14 4 13.3 4c-.5 0-1 .2-1.4.6L11.5 4.3C11.1 3.5 10.2 3 9.2 3c-1.3 0-2.3.9-2.5 2.1L6.2 9.5l-1.9-.9c-.6-.3-1.4-.2-1.9.3-.5.5-.7 1.3-.4 1.9l2.8 6.5C5.7 19.3 7.6 21 9.8 21h4.9c2.3 0 4.2-1.6 4.7-3.8l1.3-6.1c.2-.9-.2-1.8-.9-2.3l-1-.3z"/>
-        </svg>
+      <!-- A (Embaixo) - Correr / Sprint (A) -->
+      <button class="pad-round-btn pad-btn-a" id="pad-btn-a" title="Correr / Sprint (A)">
+        <span>A</span>
       </button>
     </div>
   </div>
@@ -973,130 +1171,7 @@ function initTouchControls(keys, w, VK) {
 
 	Atomics.store(w, 6, 1); // FOCUS
 
-	// --- 1. Joystick Analógico Virtual (W, A, S, D) ---
-	const base = document.getElementById('joystick-base');
-	const knob = document.getElementById('joystick-knob');
-	let joyTouchId = null;
-	let joyCenterX = 0, joyCenterY = 0;
-	const maxRadius = 45;
-
-	const resetJoystick = () => {
-		joyTouchId = null;
-		knob.style.transform = 'translate(-50%, -50%)';
-		Atomics.store(keys, VK['KeyW'], 0);
-		Atomics.store(keys, VK['KeyS'], 0);
-		Atomics.store(keys, VK['KeyA'], 0);
-		Atomics.store(keys, VK['KeyD'], 0);
-	};
-
-	base.addEventListener('touchstart', (e) => {
-		e.preventDefault();
-		if (joyTouchId !== null) return;
-		const touch = e.changedTouches[0];
-		joyTouchId = touch.identifier;
-		const rect = base.getBoundingClientRect();
-		joyCenterX = rect.left + rect.width / 2;
-		joyCenterY = rect.top + rect.height / 2;
-		updateJoystick(touch.clientX, touch.clientY);
-	}, { passive: false });
-
-	const updateJoystick = (clientX, clientY) => {
-		const dx = clientX - joyCenterX;
-		const dy = clientY - joyCenterY;
-		const dist = Math.hypot(dx, dy);
-		const clampedDist = Math.min(dist, maxRadius);
-		const angle = Math.atan2(dy, dx);
-		const knobX = Math.cos(angle) * clampedDist;
-		const knobY = Math.sin(angle) * clampedDist;
-
-		knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
-
-		const deadzone = 12;
-		if (dist > deadzone) {
-			Atomics.store(keys, VK['KeyW'], dy < -16 ? 0x80 : 0);
-			Atomics.store(keys, VK['KeyS'], dy > 16 ? 0x80 : 0);
-			Atomics.store(keys, VK['KeyA'], dx < -16 ? 0x80 : 0);
-			Atomics.store(keys, VK['KeyD'], dx > 16 ? 0x80 : 0);
-		} else {
-			Atomics.store(keys, VK['KeyW'], 0);
-			Atomics.store(keys, VK['KeyS'], 0);
-			Atomics.store(keys, VK['KeyA'], 0);
-			Atomics.store(keys, VK['KeyD'], 0);
-		}
-	};
-
-	window.addEventListener('touchmove', (e) => {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			const touch = e.changedTouches[i];
-			if (touch.identifier === joyTouchId) {
-				e.preventDefault();
-				updateJoystick(touch.clientX, touch.clientY);
-				break;
-			}
-		}
-	}, { passive: false });
-
-	window.addEventListener('touchend', (e) => {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			if (e.changedTouches[i].identifier === joyTouchId) {
-				resetJoystick();
-				break;
-			}
-		}
-	});
-	window.addEventListener('touchcancel', (e) => {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			if (e.changedTouches[i].identifier === joyTouchId) {
-				resetJoystick();
-				break;
-			}
-		}
-	});
-
-	// --- 2. Controle de Câmera (Deslizar o dedo na metade direita) ---
-	const rightZone = document.getElementById('touch-right-zone');
-	let camTouchId = null;
-	let lastCamX = 0, lastCamY = 0;
-	const SENSITIVITY = 1.8;
-
-	rightZone.addEventListener('touchstart', (e) => {
-		if (e.target.closest('.t-btn')) return;
-		e.preventDefault();
-		if (camTouchId !== null) return;
-		const touch = e.changedTouches[0];
-		camTouchId = touch.identifier;
-		lastCamX = touch.clientX;
-		lastCamY = touch.clientY;
-		Atomics.store(w, 6, 1);
-		Atomics.store(w, 7, 1);
-	}, { passive: false });
-
-	window.addEventListener('touchmove', (e) => {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			const touch = e.changedTouches[i];
-			if (touch.identifier === camTouchId) {
-				e.preventDefault();
-				const deltaX = (touch.clientX - lastCamX) * SENSITIVITY;
-				const deltaY = (touch.clientY - lastCamY) * SENSITIVITY;
-				lastCamX = touch.clientX;
-				lastCamY = touch.clientY;
-				Atomics.add(w, 2, Math.round(deltaX));
-				Atomics.add(w, 3, Math.round(deltaY));
-				break;
-			}
-		}
-	}, { passive: false });
-
-	window.addEventListener('touchend', (e) => {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			if (e.changedTouches[i].identifier === camTouchId) {
-				camTouchId = null;
-				break;
-			}
-		}
-	});
-
-	// --- 3. Vinculação dos Botões Táteis ---
+	// Helper para vincular botões do gamepad a teclas virtuais do GTA V
 	const bindKey = (id, vkCode) => {
 		const btn = document.getElementById(id);
 		if (!btn) return;
@@ -1114,40 +1189,242 @@ function initTouchControls(keys, w, VK) {
 		btn.addEventListener('touchcancel', endPress, { passive: false });
 	};
 
-	bindKey('t-btn-car', VK['KeyF']);
-	bindKey('t-btn-run', VK['ShiftLeft']);
-	bindKey('t-btn-jump', VK['Space']);
-	bindKey('t-btn-reload', VK['KeyR']);
+	// 1. Cluster de Ação ABXY
+	bindKey('pad-btn-y', VK['KeyF']);       // Y: Entrar / Sair do veículo
+	bindKey('pad-btn-x', VK['Space']);      // X: Pular / Escalar
+	bindKey('pad-btn-b', VK['KeyR']);       // B: Recarregar / Freio
+	bindKey('pad-btn-a', VK['ShiftLeft']);  // A: Correr (Sprint)
 
-	// Soco / Atirar (Botão Esquerdo)
-	const attackBtn = document.getElementById('t-btn-attack');
-	if (attackBtn) {
-		attackBtn.addEventListener('touchstart', (e) => {
-			e.preventDefault(); e.stopPropagation();
-			attackBtn.classList.add('active');
-			Atomics.or(w, 5, 1);
-		}, { passive: false });
-		const endAttack = (e) => {
-			e.preventDefault(); e.stopPropagation();
-			attackBtn.classList.remove('active');
-			Atomics.and(w, 5, ~1);
-		};
-		attackBtn.addEventListener('touchend', endAttack, { passive: false });
-		attackBtn.addEventListener('touchcancel', endAttack, { passive: false });
-	}
+	// 2. Bumpers LB e RB
+	bindKey('pad-btn-lb', VK['Tab']);       // LB: Roda de armas
+	bindKey('pad-btn-rb', VK['KeyQ']);      // RB: Cobertura / Agachar
 
-	// Mirar (Botão Direito - Alternância de mira)
-	const aimBtn = document.getElementById('t-btn-aim');
-	if (aimBtn) {
+	// 3. Botões Centrais View e Menu
+	bindKey('pad-btn-view', VK['KeyV']);    // View: Alternar câmera
+	bindKey('pad-btn-menu', VK['Escape']);  // Menu: Pausa / Mapa
+
+	// 4. Gatilhos Anatômicos LT e RT
+	const ltBtn = document.getElementById('pad-btn-lt');
+	if (ltBtn) {
+		// LT: Mirar arma (Botão direito do mouse)
 		let isAiming = false;
-		aimBtn.addEventListener('touchstart', (e) => {
+		ltBtn.addEventListener('touchstart', (e) => {
 			e.preventDefault(); e.stopPropagation();
 			isAiming = !isAiming;
-			aimBtn.classList.toggle('active', isAiming);
+			ltBtn.classList.toggle('active', isAiming);
 			if (isAiming) Atomics.or(w, 5, 2);
 			else Atomics.and(w, 5, ~2);
 		}, { passive: false });
 	}
+
+	const rtBtn = document.getElementById('pad-btn-rt');
+	if (rtBtn) {
+		// RT: Atirar / Bater (Botão esquerdo do mouse)
+		rtBtn.addEventListener('touchstart', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			rtBtn.classList.add('active');
+			Atomics.or(w, 5, 1);
+		}, { passive: false });
+		const endRt = (e) => {
+			e.preventDefault(); e.stopPropagation();
+			rtBtn.classList.remove('active');
+			Atomics.and(w, 5, ~1);
+		};
+		rtBtn.addEventListener('touchend', endRt, { passive: false });
+		rtBtn.addEventListener('touchcancel', endRt, { passive: false });
+	}
+
+	// 5. Botões do Topo (Configurações e Teclado)
+	const settingsBtn = document.getElementById('pad-btn-settings');
+	if (settingsBtn) {
+		settingsBtn.addEventListener('click', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen().catch(() => {});
+			} else {
+				document.exitFullscreen().catch(() => {});
+			}
+		});
+	}
+
+	const kbBtn = document.getElementById('pad-btn-keyboard');
+	if (kbBtn) {
+		let hiddenInput = document.getElementById('pad-hidden-input');
+		if (!hiddenInput) {
+			hiddenInput = document.createElement('input');
+			hiddenInput.id = 'pad-hidden-input';
+			hiddenInput.style.cssText = 'position:fixed;top:-100px;left:-100px;opacity:0;pointer-events:none;';
+			document.body.appendChild(hiddenInput);
+		}
+		kbBtn.addEventListener('click', (e) => {
+			e.preventDefault(); e.stopPropagation();
+			hiddenInput.focus();
+		});
+	}
+
+	// 6. Analógico Esquerdo L-Stick (Movimento W, A, S, D com Deadzone Inteligente)
+	const leftStick = document.getElementById('pad-stick-left');
+	const leftKnob = document.getElementById('pad-stick-knob-left');
+	let leftTouchId = null;
+	let leftCenterX = 0, leftCenterY = 0;
+	const leftMaxRadius = 38;
+
+	const resetLeftStick = () => {
+		leftTouchId = null;
+		if (leftKnob) leftKnob.style.transform = 'translate(-50%, -50%)';
+		Atomics.store(keys, VK['KeyW'], 0);
+		Atomics.store(keys, VK['KeyS'], 0);
+		Atomics.store(keys, VK['KeyA'], 0);
+		Atomics.store(keys, VK['KeyD'], 0);
+	};
+
+	const updateLeftStick = (clientX, clientY) => {
+		const dx = clientX - leftCenterX;
+		const dy = clientY - leftCenterY;
+		const dist = Math.hypot(dx, dy);
+		const clampedDist = Math.min(dist, leftMaxRadius);
+		const angle = Math.atan2(dy, dx);
+		const knobX = Math.cos(angle) * clampedDist;
+		const knobY = Math.sin(angle) * clampedDist;
+
+		if (leftKnob) leftKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+
+		const deadzone = 10;
+		if (dist > deadzone) {
+			Atomics.store(keys, VK['KeyW'], dy < -12 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyS'], dy > 12 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyA'], dx < -12 ? 0x80 : 0);
+			Atomics.store(keys, VK['KeyD'], dx > 12 ? 0x80 : 0);
+		} else {
+			Atomics.store(keys, VK['KeyW'], 0);
+			Atomics.store(keys, VK['KeyS'], 0);
+			Atomics.store(keys, VK['KeyA'], 0);
+			Atomics.store(keys, VK['KeyD'], 0);
+		}
+	};
+
+	const leftZone = document.getElementById('touch-left-zone');
+	if (leftZone && leftStick) {
+		leftZone.addEventListener('touchstart', (e) => {
+			if (e.target.closest('.pad-trigger') || e.target.closest('.pad-bumper') || e.target.closest('.pad-icon-btn')) return;
+			e.preventDefault();
+			if (leftTouchId !== null) return;
+			const touch = e.changedTouches[0];
+			leftTouchId = touch.identifier;
+			const rect = leftStick.getBoundingClientRect();
+			leftCenterX = rect.left + rect.width / 2;
+			leftCenterY = rect.top + rect.height / 2;
+			updateLeftStick(touch.clientX, touch.clientY);
+		}, { passive: false });
+	}
+
+	window.addEventListener('touchmove', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+			if (touch.identifier === leftTouchId) {
+				e.preventDefault();
+				updateLeftStick(touch.clientX, touch.clientY);
+				break;
+			}
+		}
+	}, { passive: false });
+
+	window.addEventListener('touchend', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === leftTouchId) {
+				resetLeftStick();
+				break;
+			}
+		}
+	});
+	window.addEventListener('touchcancel', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === leftTouchId) {
+				resetLeftStick();
+				break;
+			}
+		}
+	});
+
+	// 7. Controle de Câmera (R-Stick e Swipe Livre no Lado Direito)
+	const rightZone = document.getElementById('touch-right-zone');
+	const rightStick = document.getElementById('pad-stick-right');
+	const rightKnob = document.getElementById('pad-stick-knob-right');
+	let camTouchId = null;
+	let lastCamX = 0, lastCamY = 0;
+	let isRightStickActive = false;
+	const SENSITIVITY = 1.8;
+
+	const resetRightStick = () => {
+		if (rightKnob) rightKnob.style.transform = 'translate(-50%, -50%)';
+		isRightStickActive = false;
+	};
+
+	if (rightZone) {
+		rightZone.addEventListener('touchstart', (e) => {
+			if (e.target.closest('.pad-round-btn') || e.target.closest('.pad-trigger') || e.target.closest('.pad-bumper')) return;
+			e.preventDefault();
+			if (camTouchId !== null) return;
+			const touch = e.changedTouches[0];
+			camTouchId = touch.identifier;
+			lastCamX = touch.clientX;
+			lastCamY = touch.clientY;
+			isRightStickActive = !!e.target.closest('#pad-stick-right');
+			Atomics.store(w, 6, 1);
+			Atomics.store(w, 7, 1);
+		}, { passive: false });
+	}
+
+	window.addEventListener('touchmove', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+			if (touch.identifier === camTouchId) {
+				e.preventDefault();
+				const deltaX = (touch.clientX - lastCamX) * SENSITIVITY;
+				const deltaY = (touch.clientY - lastCamY) * SENSITIVITY;
+				lastCamX = touch.clientX;
+				lastCamY = touch.clientY;
+
+				if (isRightStickActive && rightStick && rightKnob) {
+					const rect = rightStick.getBoundingClientRect();
+					const cx = rect.left + rect.width / 2;
+					const cy = rect.top + rect.height / 2;
+					const dx = touch.clientX - cx;
+					const dy = touch.clientY - cy;
+					const dist = Math.hypot(dx, dy);
+					const maxR = 25;
+					const clamped = Math.min(dist, maxR);
+					const angle = Math.atan2(dy, dx);
+					const kx = Math.cos(angle) * clamped;
+					const ky = Math.sin(angle) * clamped;
+					rightKnob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+				}
+
+				Atomics.add(w, 2, Math.round(deltaX));
+				Atomics.add(w, 3, Math.round(deltaY));
+				break;
+			}
+		}
+	}, { passive: false });
+
+	window.addEventListener('touchend', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === camTouchId) {
+				camTouchId = null;
+				resetRightStick();
+				break;
+			}
+		}
+	});
+	window.addEventListener('touchcancel', (e) => {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === camTouchId) {
+				camTouchId = null;
+				resetRightStick();
+				break;
+			}
+		}
+	});
 }
 
 // ==== SISTEMA DE INSTALAÇÃO DE APK / PWA & SERVICE WORKER ====

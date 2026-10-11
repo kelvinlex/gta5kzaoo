@@ -252,7 +252,7 @@
   </div>
 </div>
 
-<div id="loading"><div id="ls-stage"><div id="ls-screens"></div><img id="ls-logo" src="/b/8b0b5899ed/title/logo.png" alt=""><div id="ls-bars"><div id="modes" class="ls-bar"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div class="ls-bar"><span id="label">Starting...</span><span id="pct">0%</span><i class="ls-spin"></i></div></div></div><div id="ls-log"><div id="data"></div><div id="console"></div></div><div id="bar"><div id="fill"></div></div></div>
+<div id="loading"><div id="ls-stage"><div id="ls-screens"></div><img id="ls-logo" src="/b/8b0b5899ed/title/logo.png" alt=""><div id="ls-bars"><div id="modes" class="ls-bar"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div class="ls-bar"><span id="label">Starting...</span><span id="pct">0%</span><i class="ls-spin"></i></div></div></div><div id="ls-log"><div id="data"></div><div id="console"></div></div><div id="bar"><div id="fill"></div></div><button id="btn-fix-save" style="display:none;position:absolute;bottom:42px;left:50%;transform:translateX(-50%);background:#e53935;color:#fff;border:none;padding:10px 18px;border-radius:6px;font:bold 13px sans-serif;cursor:pointer;z-index:25;box-shadow:0 4px 15px rgba(0,0,0,0.6);">⚠️ Carregamento Travou em 81%? Clique aqui para Restaurar e Jogar</button></div>
 <div id="fps"></div>
 <script type="module">
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and
@@ -547,15 +547,30 @@ showModes();
 	const dataEl = document.getElementById('data');
 	const WORLD_BYTES = 1.2e9;		// game data the world needs after the scripts start (measured: about 1.2-1.4 GB the first time)
 	// Stall watchdog: nothing (no log line, no data, no progress) from any engine thread for 30 s while loading. A tab that ran out of memory dies ("Aw, Snap!") and cannot say so,
-	// but one that is thrashing or deadlocked can: show it, and leave a timestamped line in the server log for diagnosis.
+	const fixBtn = document.getElementById('btn-fix-save');
+	if (fixBtn) {
+		fixBtn.addEventListener('click', async () => {
+			fixBtn.textContent = 'Restaurando e limpando save...';
+			try {
+				await new Promise((res) => {
+					const req = indexedDB.deleteDatabase('gta5-userdata');
+					req.onsuccess = req.onerror = req.onblocked = res;
+				});
+			} catch (e) {}
+			location.href = location.pathname + '?newgame=1&low=1';
+		});
+	}
 	setInterval(() => {
-		if (ready) return;
+		if (ready) { if (fixBtn) fixBtn.style.display = 'none'; return; }
 		if (waitingChoice) { if (!startMode) { lastActivity = performance.now(); return; } waitingChoice = false; label.textContent = lastLabel; }
 		const quiet = (performance.now() - lastActivity) / 1000;
-		if (quiet > 30) {
-			label.textContent = 'No progress for ' + (quiet | 0) + ' s' + (lastLabel ? ' (last step: ' + lastLabel + ')' : '') + ': the device may be out of memory. Close other tabs, or reload.';
+		if (quiet > 10 && shown >= 65 && fixBtn) {
+			fixBtn.style.display = 'block';
+		}
+		if (quiet > 25) {
+			label.textContent = 'No progress for ' + (quiet | 0) + ' s' + (lastLabel ? ' (last step: ' + lastLabel + ')' : '') + ': clique no botão vermelho abaixo para restaurar.';
 			label.style.color = '#e96';
-			if (quiet - stallLogged > 30) { stallLogged = quiet; postLog('[page] STALL: no progress for ' + (quiet | 0) + ' s, last step "' + lastLabel + '", shown ' + shown.toFixed(0) + '%'); }
+			if (quiet - stallLogged > 25) { stallLogged = quiet; postLog('[page] STALL: no progress for ' + (quiet | 0) + ' s, last step "' + lastLabel + '", shown ' + shown.toFixed(0) + '%'); }
 		} else if (stallLogged) { stallLogged = 0; label.style.color = ''; }
 	}, 2000);
 	const progressTimer = setInterval(() => {

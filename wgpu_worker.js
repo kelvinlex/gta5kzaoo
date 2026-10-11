@@ -2656,7 +2656,11 @@ async function present(id) {
 		if (!blit) makeBlit();
 		const pass2 = getEncoder().beginRenderPass({ colorAttachments: [{ view: canvasCtx.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store' }] });
 		pass2.setPipeline(blit);
-		if (!t.blitBG) t.blitBG = device.createBindGroup({ layout: blit.getBindGroupLayout(0), entries: [{ binding: 0, resource: t.tex.createView({ dimension: '2d', baseMipLevel: 0, mipLevelCount: 1 }) }] });
+		if (!t.blitBG || t.blitW !== t.desc.size.width || t.blitH !== t.desc.size.height) {
+			t.blitW = t.desc.size.width;
+			t.blitH = t.desc.size.height;
+			t.blitBG = device.createBindGroup({ layout: blit.getBindGroupLayout(0), entries: [{ binding: 0, resource: t.tex.createView({ dimension: '2d', baseMipLevel: 0, mipLevelCount: 1 }) }] });
+		}
 		pass2.setBindGroup(0, t.blitBG);
 		pass2.draw(3);
 		pass2.end();
@@ -2720,15 +2724,16 @@ async function present(id) {
 		lastPresentDraws = drawCount;
 		if (!isNode && !progressChannel) progressChannel = new BroadcastChannel('game-progress');
 		if (!isNode && presentCount === 1) progressChannel.postMessage({ pct: 76, label: 'First frame' });
-		if (!worldSent && (worldSince || d > 300)) {
+		const isLowMem = (new URLSearchParams(self.location.search).get('low') === '1' || isNode);
+		if (!worldSent && (worldSince || d > 100 || (isLowMem && presentCount >= 2))) {
 			if (!worldSince) { worldSince = now; worldSkips0 = pendingSkips; }
 			if (pendingSkips !== skipsAtPresent) worldClean = 0; else if (!worldClean) worldClean = now;
-			const maxWait = (new URLSearchParams(self.location.search).get('low') === '1' || isNode) ? 2000 : 4000;
-			if ((worldClean && now - worldClean >= 600) || now - worldSince >= maxWait) {
+			const maxWait = isLowMem ? 600 : 2500;
+			if ((worldClean && now - worldClean >= 300) || now - worldSince >= maxWait || (isLowMem && presentCount >= 3)) {
 				worldSent = true;
 				logLine('world shown: title screen held ' + ((now - worldSince) / 1000).toFixed(1) + ' s for compiling pipelines (' + (pendingSkips - worldSkips0) + ' draws skipped meanwhile, ' + pipelinesPending + ' still compiling); compiled ahead ' + aheadMade + ', used ' + aheadUsed + ', compiled when first drawn ' + pipeCreates + '; shader variants for the inter-stage limit: ' + remapVariants[0] + ' vertex, ' + remapVariants[1] + ' pixel');
 				if (!isNode) progressChannel.postMessage({ pct: 100, label: 'Ready', world: true });
-			} else if (!isNode && now - worldNoteT >= 1000) { worldNoteT = now; progressChannel.postMessage({ compiling: pipelinesPending }); }
+			} else if (!isNode && now - worldNoteT >= 500) { worldNoteT = now; progressChannel.postMessage({ compiling: pipelinesPending, pct: 99 }); }
 		}
 		skipsAtPresent = pendingSkips;
 		if (!isNode && now - recipesSaveT >= 20000) { recipesSaveT = now; saveRecipes(); }

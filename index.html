@@ -815,11 +815,11 @@ showModes();
 			return;
 		}
 		if (m.gpuLost) {
-			hud.textContent = 'Memória gráfica insuficiente no celular (' + m.gpuLost + '). Reiniciando em modo super leve...';
-			hud.style.color = '#f66';
-			label.textContent = 'Ajustando modo ultra-leve para celular...';
-			label.style.color = '#f90';
-			setTimeout(() => { location.href = location.pathname + '?low=1&scale=0.5&res=640x360'; }, 2000);
+			console.warn('[GPU lost]', m.gpuLost);
+			hud.textContent = 'Memória gráfica ajustada (' + m.gpuLost + ').';
+			if (!location.search.includes('low=1')) {
+				setTimeout(() => { location.href = location.pathname + '?low=1&scale=0.55&res=640x360'; }, 1500);
+			}
 			return;
 		}
 		if (m.error) { label.textContent = m.error; label.style.color = '#e66'; return; }

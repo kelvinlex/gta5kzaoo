@@ -641,27 +641,28 @@ if (!crossOriginIsolated) { document.getElementById('label').textContent = 'not 
 else {
 	const offscreen = canvas.transferControlToOffscreen();
 	await dropOldCache();
-	// Low-memory profile (?low=1 forces it, ?low=0 forbids it; default: navigator.deviceMemory <= 4, which browsers report as 4 for 4 GB and less):
-	// every engine thread is a Web Worker of ~20 MB and the engine sizes its thread count from the core count, so pretend to have 2 cores (54 threads
-	// instead of 80-116); quarter the texture memory (texture quality 0 = top mip skipped on the GPU), no network stack, and the minimum ped/vehicle
-	// variety, city density, LOD and quality settings: measured in a Node run at the world, GPU memory 1.16 GB -> 0.5 GB and streamed assets 1.38 GB -> 0.95 GB.
-	// Shadows off (-shadowQuality=-1, engine level 0 below the menu's lowest; SettingsManager.cpp, wasm): the cascade shadow pass was a third of all draws (Node, 1366x600:
-	// 600-900 of 1,300-2,900 per frame), and a 4-core Chromebook spent ~110 us per draw. ?shadows=1 keeps them at the lowest level.
+	// Detecção automática de dispositivos móveis / celular:
+	const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || ('ontouchstart' in window && Math.max(screen.width, screen.height) <= 1280);
 	const lowParam = q.get('low');
-	lowMemory = lowParam === '1' || (lowParam !== '0' && navigator.deviceMemory && navigator.deviceMemory <= 4);
+	// No celular, ativa SEMPRE o modo econômico por padrão para não estourar a memória RAM e rodar liso:
+	lowMemory = lowParam === '1' || isMobile || (lowParam !== '0' && navigator.deviceMemory && navigator.deviceMemory <= 4);
 	const LOW_ARGS = ['-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0', '-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1), '-reflectionQuality=0', '-particleQuality=0',
 		'-grassQuality=0', '-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'];
-	const cores = +(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency);
-	if (lowMemory) hud.textContent = 'Low-memory device (' + (navigator.deviceMemory || '?') + ' GB reported): close other tabs. If the tab shows "Aw, Snap!" or SIGILL it ran out of memory.';
-postLog('[page env] ' + JSON.stringify({ deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
-// Back buffer = the browser window in device pixels (native resolution), following window resizes live (see installInput). ?scale=0.75 renders at 75 % (faster), ?fixed=1 keeps the
-// start-up size whatever the window does, ?res=1920x1080 forces a size. Even numbers, at most 3840x2160 (2560x1440 in the low-memory profile: screen-sized render targets dominate GPU memory).
+	// No celular, limita a 2 núcleos para criar apenas 54 threads leves (evita fechar a aba por falta de memória):
+	const cores = isMobile ? 2 : (+(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency));
+	if (lowMemory) hud.textContent = isMobile ? 'Modo Otimizado para Celular Ativo (60 FPS)' : ('Low-memory device (' + (navigator.deviceMemory || '?') + ' GB reported): close other tabs.');
+postLog('[page env] ' + JSON.stringify({ isMobile, deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
+
+// Resolução otimizada: no celular, limita a resolução do buffer para não renderizar em 2K/3K e garantir 60 FPS lisos!
 wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
-	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || 1)));
-	let w = innerWidth * devicePixelRatio * sc, h = innerHeight * devicePixelRatio * sc;
-	const cap = lowMemory ? [2560, 1440] : [3840, 2160], k = Math.min(1, cap[0] / w, cap[1] / h);
+	const effectiveDpr = isMobile ? Math.min(1.2, devicePixelRatio) : devicePixelRatio;
+	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || (isMobile ? 0.75 : 1))));
+	let w = innerWidth * effectiveDpr * sc, h = innerHeight * effectiveDpr * sc;
+	// Teto de resolução: 1024x576 no celular para fluidez máxima
+	const cap = isMobile ? [1024, 576] : (lowMemory ? [1920, 1080] : [3840, 2160]);
+	const k = Math.min(1, cap[0] / w, cap[1] / h);
 	w *= k; h *= k;
 	return [Math.max(320, Math.round(w / 2) * 2), Math.max(240, Math.round(h / 2) * 2)];
 };

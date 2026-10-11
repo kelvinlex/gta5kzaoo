@@ -1,0 +1,31 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/b/:match*",
+      "destination": "https://gta.deloskiyt.pl/b/:match*"
+    },
+    {
+      "source": "/data/:match*",
+      "destination": "https://gta.deloskiyt.pl/data/:match*"
+    }
+  ]
+}

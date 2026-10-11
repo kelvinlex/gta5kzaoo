@@ -2,7 +2,13 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>GTA V Web</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preload" href="/b/8b0b5899ed/game.wasm" as="fetch" crossorigin="anonymous">
 <link rel="preload" href="/b/8b0b5899ed/loader.js" as="fetch" crossorigin="anonymous">
 <link rel="preload" href="/b/8b0b5899ed/title/chalet.woff" as="font" type="font/woff" crossorigin>
@@ -43,6 +49,33 @@
 	#fill { height: 100%; width: 0; background: #7cc576; }
 	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
 	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+
+	/* ==== APK DOWNLOAD & INSTALL BUTTON ==== */
+	#btn-install-apk {
+		position: fixed;
+		top: 14px;
+		left: 14px;
+		height: 38px;
+		padding: 0 14px;
+		border-radius: 20px;
+		background: rgba(30, 144, 255, 0.45);
+		border: 1.5px solid rgba(135, 206, 250, 0.6);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		cursor: pointer;
+		z-index: 100;
+		font: bold 12px sans-serif;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+		transition: transform .15s, background .15s;
+		user-select: none;
+		-webkit-user-select: none;
+		outline: none;
+	}
+	#btn-install-apk:active { transform: scale(0.92); background: rgba(30, 144, 255, 0.75); }
 
 	/* ==== FULLSCREEN BUTTON ==== */
 	#btn-fullscreen {
@@ -185,12 +218,41 @@
 <canvas id="canvas" width="800" height="600" tabindex="-1"></canvas>
 <div id="hud"></div>
 
+<!-- Botão de Instalar / Baixar APK -->
+<button id="btn-install-apk" title="Baixar e Instalar APK no Celular">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>
+  <span>Baixar APK</span>
+</button>
+
 <!-- Botão de Tela Cheia -->
 <button id="btn-fullscreen" title="Tela Cheia">
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
   </svg>
 </button>
+
+<!-- Modal de Instruções de Instalação do APK -->
+<div id="apk-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#181818;border:1px solid #333;border-radius:14px;max-width:380px;width:100%;padding:22px;color:#eee;font-family:sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.8);text-align:center;">
+    <div style="width:52px;height:52px;background:rgba(30,144,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#1e90ff;">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+    </div>
+    <h3 style="margin:0 0 8px;font-size:18px;color:#fff;">Baixar & Instalar GTA V</h3>
+    <p style="font-size:13px;line-height:1.5;color:#aaa;margin:0 0 16px;text-align:left;">
+      Instale o jogo como um <b>aplicativo (APK)</b> no seu Android para jogar com desempenho máximo e em tela cheia:
+    </p>
+    <div style="background:#222;border-radius:8px;padding:12px;margin-bottom:18px;text-align:left;font-size:12px;line-height:1.6;color:#ddd;">
+      <div>1. Toque nos <b>3 pontinhos (⋮)</b> do seu navegador.</div>
+      <div>2. Selecione <b>"Instalar aplicativo"</b> ou <b>"Adicionar à tela inicial"</b>.</div>
+      <div>3. O ícone do GTA V será adicionado ao seu celular como um app real!</div>
+    </div>
+    <button id="btn-close-apk-modal" style="width:100%;padding:12px;background:#1e90ff;border:none;border-radius:8px;color:#fff;font-weight:bold;font-size:14px;cursor:pointer;">Entendi, Fechar</button>
+  </div>
+</div>
 
 <!-- Controles Virtuais Táteis para Celular -->
 <div id="touch-controls" class="hidden">
@@ -266,11 +328,11 @@ let lastAdTime = 0;
 const AD_COOLDOWN_MS = 3.5 * 60 * 1000; // 3.5 minutos entre anúncios para maximizar ganhos
 let pendingDeathAd = false;
 
-function triggerMonetagAd(reason = 'general') {
+function triggerMonetagAd(reason = 'general', force = false) {
 	if (!MONETAG_DIRECT_LINK || MONETAG_DIRECT_LINK.trim() === "") return;
 	const now = Date.now();
-	// Primeiro anúncio sempre libera no início; anúncios seguintes respeitam o intervalo ou evento de morte
-	if (lastAdTime > 0 && (now - lastAdTime) < AD_COOLDOWN_MS && !pendingDeathAd) {
+	// Primeiro anúncio sempre libera no início; anúncios seguintes respeitam o intervalo ou evento de morte, a menos que seja forçado
+	if (!force && lastAdTime > 0 && (now - lastAdTime) < AD_COOLDOWN_MS && !pendingDeathAd) {
 		return;
 	}
 	lastAdTime = now;
@@ -1087,6 +1149,60 @@ function initTouchControls(keys, w, VK) {
 		}, { passive: false });
 	}
 }
+
+// ==== SISTEMA DE INSTALAÇÃO DE APK / PWA & SERVICE WORKER ====
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('/sw.js').catch(() => {});
+	});
+}
+
+let deferredPrompt = null;
+const installApkBtn = document.getElementById('btn-install-apk');
+const apkModal = document.getElementById('apk-modal');
+const closeApkModalBtn = document.getElementById('btn-close-apk-modal');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+	e.preventDefault();
+	deferredPrompt = e;
+	if (installApkBtn) installApkBtn.style.display = 'flex';
+});
+
+if (installApkBtn) {
+	installApkBtn.addEventListener('click', async (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// Dispara anúncio inteligente ao clicar em baixar APK
+		triggerMonetagAd('install_apk_click', true);
+
+		if (deferredPrompt) {
+			try {
+				deferredPrompt.prompt();
+				const { outcome } = await deferredPrompt.userChoice;
+				if (outcome === 'accepted') {
+					installApkBtn.style.display = 'none';
+				}
+				deferredPrompt = null;
+			} catch (err) {
+				if (apkModal) apkModal.style.display = 'flex';
+			}
+		} else {
+			// Se o navegador já instalou ou não disparou o prompt nativo ainda, abre tutorial guiado
+			if (apkModal) apkModal.style.display = 'flex';
+		}
+	});
+}
+
+if (closeApkModalBtn && apkModal) {
+	closeApkModalBtn.addEventListener('click', () => {
+		apkModal.style.display = 'none';
+	});
+}
+window.addEventListener('appinstalled', () => {
+	if (installApkBtn) installApkBtn.style.display = 'none';
+	if (apkModal) apkModal.style.display = 'none';
+});
 </script>
 </body>
 </html>

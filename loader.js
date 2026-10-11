@@ -20,6 +20,7 @@ self.onmessage = (ev) => {
 	if (m.gpuLimits) gq.set('limits', m.gpuLimits);		// ?limits=name:value,...: a smaller device (diagnosis of weaker GPUs)
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const gpu = new Worker(B + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
+	const io = new Worker(B + '/io_worker.js');
 	const dataBase = (self.location.hostname.includes('vercel.app') || self.location.hostname.includes('trycloudflare.com'))
 		? 'https://gta.deloskiyt.pl/data/'
 		: (m.dataBase || self.location.origin + '/data/');
@@ -28,6 +29,10 @@ self.onmessage = (ev) => {
 	io.onmessage = (e) => { if (e.data.loaded && ++loaded === 2) start(); };
 	gpu.onmessage = (e) => {
 		if (e.data.loaded && ++loaded === 2) start();
+	};
+	io.onerror = (e) => {
+		console.error('io worker failed to load: ' + e.message);
+		new BroadcastChannel('game-progress').postMessage({ error: 'Erro nos dados do jogo: ' + e.message });
 	};
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
@@ -144,5 +149,8 @@ self.onmessage = (ev) => {
 		console.log('loader: starting engine: ' + m.args.join(' ') + ' (cores ' + m.cores + ')');
 		importScripts(B + '/game.js');
 	};
-	gpu.onerror = (e) => console.error('gpu worker failed to load: ' + e.message);
+	gpu.onerror = (e) => {
+		console.error('gpu worker failed to load: ' + e.message);
+		new BroadcastChannel('game-progress').postMessage({ error: 'Erro no WebGPU / Gráficos: ' + (e.message || 'Dispositivo não suportado') });
+	};
 };

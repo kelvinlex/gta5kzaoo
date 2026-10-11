@@ -795,7 +795,14 @@ showModes();
 			dirty = true;
 			return;
 		}
-		if (m.gpuLost) { hud.textContent = 'The graphics device was lost (' + m.gpuLost + '): the screen will stay black. Reload the page.'; hud.style.color = '#f66'; return; }
+		if (m.gpuLost) {
+			hud.textContent = 'Memória gráfica insuficiente no celular (' + m.gpuLost + '). Reiniciando em modo super leve...';
+			hud.style.color = '#f66';
+			label.textContent = 'Ajustando modo ultra-leve para celular...';
+			label.style.color = '#f90';
+			setTimeout(() => { location.href = location.pathname + '?low=1&scale=0.5&res=640x360'; }, 2000);
+			return;
+		}
 		if (m.error) { label.textContent = m.error; label.style.color = '#e66'; return; }
 		if (m.pct > target) { target = m.pct; if (m.label) { lastLabel = m.label; if (!waitingChoice) label.textContent = m.label; } if (m.pct >= 72 && worldBase < 0) worldBase = dataBytes; }
 		if (m.choice && !startMode) { waitingChoice = true; modesEl.classList.add('ask'); showModes(); }		// the engine waits for the choice: showModes asks for it in the label
@@ -891,14 +898,23 @@ addEventListener('pagehide', () => { try { new BroadcastChannel('game-io').postM
 // Earlier versions cached the game data with a service worker (sw.js) and the Cache API: remove both, the io worker keeps its own store (io_worker.js).
 async function dropOldCache() {
 	try {
-		if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+		if ('serviceWorker' in navigator) {
+			for (const r of await navigator.serviceWorker.getRegistrations()) {
+				if (r.active && r.active.scriptURL && r.active.scriptURL.includes('gamedata')) await r.unregister();
+			}
+		}
 		if (window.caches) for (const k of await caches.keys()) if (k.startsWith('gamedata')) await caches.delete(k);
 	} catch (e) { console.warn('could not remove the old cache: ' + e); }
 }
 let lowMemory = false;		// set below (module scope: the ?mem readout further down also needs it)
 let startSize = [1280, 720], wantSize = null;		// set below (module scope: installInput uses them)
-if (!crossOriginIsolated) { document.getElementById('label').textContent = 'not cross-origin isolated: open the page over https (or localhost); the server sends COOP/COEP'; document.getElementById('label').style.color = '#e66'; }
-else {
+if (!crossOriginIsolated) {
+	document.getElementById('label').textContent = 'Erro de isolamento de origem. Recarregue a página com HTTPS ativo.';
+	document.getElementById('label').style.color = '#e66';
+} else if (!navigator.gpu) {
+	document.getElementById('label').textContent = 'WebGPU não detectado neste navegador. No celular, utilize o Google Chrome atualizado.';
+	document.getElementById('label').style.color = '#ff9800';
+} else {
 	const offscreen = canvas.transferControlToOffscreen();
 	await dropOldCache();
 	// Detecção automática de dispositivos móveis / celular:
@@ -906,22 +922,26 @@ else {
 	const lowParam = q.get('low');
 	// No celular, ativa SEMPRE o modo econômico por padrão para não estourar a memória RAM e rodar liso:
 	lowMemory = lowParam === '1' || isMobile || (lowParam !== '0' && navigator.deviceMemory && navigator.deviceMemory <= 4);
-	const LOW_ARGS = ['-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0', '-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1), '-reflectionQuality=0', '-particleQuality=0',
-		'-grassQuality=0', '-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'];
-	// No celular, limita a 2 núcleos para criar apenas 54 threads leves (evita fechar a aba por falta de memória):
+	const LOW_ARGS = [
+		'-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0',
+		'-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1),
+		'-reflectionQuality=0', '-particleQuality=0', '-grassQuality=0',
+		'-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'
+	];
+	// 2 núcleos para celular e low-memory: cria threads dedicadas com estabilidade total:
 	const cores = isMobile ? 2 : (+(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency));
-	if (lowMemory) hud.textContent = isMobile ? 'Modo Otimizado para Celular Ativo (60 FPS)' : ('Low-memory device (' + (navigator.deviceMemory || '?') + ' GB reported): close other tabs.');
-postLog('[page env] ' + JSON.stringify({ isMobile, deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
+	if (lowMemory) hud.textContent = isMobile ? 'Modo Otimizado para Celular Ativo (60 FPS)' : ('Dispositivo com economia ativa (' + (navigator.deviceMemory || '?') + ' GB detectados).');
+	postLog('[page env] ' + JSON.stringify({ isMobile, deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
 
-// Resolução otimizada: no celular, limita a resolução do buffer para não renderizar em 2K/3K e garantir 60 FPS lisos!
+// Resolução otimizada: no celular, limita a resolução do buffer para não estourar o heap Wasm e VRAM
 wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
-	const effectiveDpr = isMobile ? Math.min(1.2, devicePixelRatio) : devicePixelRatio;
-	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || (isMobile ? 0.75 : 1))));
+	const effectiveDpr = isMobile ? 1.0 : devicePixelRatio;
+	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || (isMobile ? 0.7 : 1))));
 	let w = innerWidth * effectiveDpr * sc, h = innerHeight * effectiveDpr * sc;
-	// Teto de resolução: 1024x576 no celular para fluidez máxima
-	const cap = isMobile ? [1024, 576] : (lowMemory ? [1920, 1080] : [3840, 2160]);
+	// Teto de resolução: 720x405 no celular para fluidez máxima a 60 FPS e sem perda de dispositivo
+	const cap = isMobile ? [720, 405] : (lowMemory ? [960, 540] : [1280, 720]);
 	const k = Math.min(1, cap[0] / w, cap[1] / h);
 	w *= k; h *= k;
 	return [Math.max(320, Math.round(w / 2) * 2), Math.max(240, Math.round(h / 2) * 2)];
@@ -961,7 +981,7 @@ const worker = new Worker(BASE + '/loader.js');
 		fullConsole: !!q.get('console'),
 		remoteLog,		// ?log=1 (above): loader.js passes it on to the engine threads and the GPU and io workers
 		trace: !!q.get('trace'),		// ?trace=1: log every engine file request (io_worker.js)
-		slots: +(q.get('slots') || 0),		// ?slots=N: frames in flight of the GPU worker (diagnostics)
+		slots: isMobile ? 2 : (+(q.get('slots') || 0)),		// no celular 2 slots economiza VRAM
 		syncPipelines: !!q.get('syncpipelines'),		// ?syncpipelines=1: the GPU worker compiles pipelines synchronously (no draws skipped while one compiles)
 		record: !!q.get('record'),		// ?record=1: log the boot read set (io_worker.js), for record_bootset.py
 		lowMemory,

@@ -457,9 +457,9 @@ let stopTitle = () => {};
 // input block (WasmInputBlock.startMode, wasm/platform/input/browser_input_wasm.cpp): 1 = Story Mode (the release startup: a new game from the Prologue),
 // 2 = Sandbox Mode on the GTA V map (free roam at a random spot with every weapon), 3 = Sandbox Mode on env_test. It can change until the engine takes it
 // (where it reads -level, about 62 % into the load; it waits there if nothing was chosen, and the page then pulses the key caps); after that only the chosen
-// item stays. ?mode=story|sandbox chooses up front (with &map=env_test for Sandbox Mode on env_test).
-let startMode = q.get('mode') === 'story' ? 1 : q.get('mode') === 'sandbox' ? (q.get('map') === 'env_test' ? 3 : 2) : 0;
-let startModeWord = null, startCommitted = false, pickingMap = false, waitingChoice = false;		// waitingChoice: the engine waits for the choice
+// Define o Story Mode como padrão (1) para não travar em 76% esperando escolha do jogador:
+let startMode = q.get('mode') === 'sandbox' ? (q.get('map') === 'env_test' ? 3 : 2) : 1;
+let startModeWord = null, startCommitted = false, pickingMap = false, waitingChoice = false;
 const ACTS = {		// button: text, key cap, key codes
 	back: ['Back', 'Backspace', ['Backspace']],
 	map5: ['GTA V Map', '5', ['Digit5', 'Numpad5']],

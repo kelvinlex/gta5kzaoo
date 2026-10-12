@@ -370,6 +370,15 @@
   <span>Baixar APK</span>
 </button>
 
+<!-- Botão de Configurações & Otimização do Celular -->
+<button id="btn-settings-top" title="Configurações & Otimização de Desempenho" style="position:fixed;top:14px;right:66px;height:44px;padding:0 14px;border-radius:22px;background:rgba(0,0,0,0.65);border:1.5px solid rgba(0,188,212,0.6);color:#fff;display:flex;align-items:center;gap:7px;cursor:pointer;z-index:100;font:bold 12px sans-serif;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:transform .15s, background .15s;outline:none;">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00bcd4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+  <span style="color:#00bcd4;">Ajustes</span>
+</button>
+
 <!-- Botão de Tela Cheia -->
 <button id="btn-fullscreen" title="Tela Cheia">
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -395,6 +404,79 @@
       <div>3. O ícone do GTA V será adicionado ao seu celular como um app real!</div>
     </div>
     <button id="btn-close-apk-modal" style="width:100%;padding:12px;background:#1e90ff;border:none;border-radius:8px;color:#fff;font-weight:bold;font-size:14px;cursor:pointer;">Entendi, Fechar</button>
+  </div>
+</div>
+
+<!-- Modal de Ajustes & Otimização de Desempenho (Flags Oficiais) -->
+<div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#181818;border:1px solid #333;border-radius:14px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;padding:20px;color:#eee;font-family:sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.8);text-align:left;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:17px;color:#fff;display:flex;align-items:center;gap:8px;">
+        ⚙️ Configurações & Desempenho
+      </h3>
+      <button id="btn-close-settings-modal" style="background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <p style="font-size:12px;color:#aaa;margin:0 0 14px;line-height:1.4;">
+      Ajuste os parâmetros oficiais do motor para máxima fluidez no seu celular:
+    </p>
+
+    <!-- Predefinições Rápidas -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <button class="opt-preset-btn" data-preset="smooth" style="background:#00bcd4;color:#000;border:none;padding:9px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">🚀 Modo Ultra Liso (60 FPS)</button>
+      <button class="opt-preset-btn" data-preset="battery" style="background:#333;color:#fff;border:1px solid #555;padding:9px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">🔋 Economia (30 FPS)</button>
+      <button class="opt-preset-btn" data-preset="prologue" style="background:#333;color:#fff;border:1px solid #555;padding:9px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">🎬 Novo Jogo (Prólogo)</button>
+      <button class="opt-preset-btn" data-preset="sandbox" style="background:#333;color:#fff;border:1px solid #555;padding:9px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">🗺️ Modo Sandbox (GTA VI)</button>
+    </div>
+
+    <!-- Ajustes Individuais -->
+    <div style="background:#222;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;display:flex;flex-direction:column;gap:10px;">
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Perfil de Baixa Memória (low):</span>
+        <select id="cfg-low" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;padding:3px 6px;">
+          <option value="1">low=1 (Ativado - Recomendado)</option>
+          <option value="0">low=0 (Desativado)</option>
+        </select>
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Sombras Mínimas (shadows):</span>
+        <select id="cfg-shadows" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;padding:3px 6px;">
+          <option value="0">shadows=0 (Desativadas - Mais FPS)</option>
+          <option value="1">shadows=1 (Qualidade Mínima)</option>
+        </select>
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Limite de FPS (fps):</span>
+        <select id="cfg-fps" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;padding:3px 6px;">
+          <option value="60">60 FPS (Padrão)</option>
+          <option value="30">fps=30 (Estável)</option>
+          <option value="0">fps=0 (Desativado / Ilimitado)</option>
+        </select>
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Escala de Resolução (scale):</span>
+        <select id="cfg-scale" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;padding:3px 6px;">
+          <option value="0.75">scale=0.75 (Equilibrado)</option>
+          <option value="0.6">scale=0.60 (Desempenho Alto)</option>
+          <option value="0.5">scale=0.50 (Máxima Fluidez)</option>
+          <option value="1.0">scale=1.00 (Nativo 100%)</option>
+        </select>
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Modo Inicial (mode):</span>
+        <select id="cfg-mode" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;padding:3px 6px;">
+          <option value="story">História (Continuar Save)</option>
+          <option value="newgame">História + Novo Jogo (Prólogo)</option>
+          <option value="sandbox_gtav">Sandbox: Mapa GTA V</option>
+          <option value="sandbox_envtest">Sandbox: Mapa GTA VI (env_test)</option>
+        </select>
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Tamanho Fixo da Janela (fixed):</span>
+        <input type="checkbox" id="cfg-fixed" checked style="transform:scale(1.2);">
+      </label>
+    </div>
+
+    <button id="btn-apply-settings" style="width:100%;padding:11px;background:#00bcd4;border:none;border-radius:8px;color:#000;font-weight:bold;font-size:13px;cursor:pointer;">Salvar e Recarregar com estes Parâmetros</button>
   </div>
 </div>
 
@@ -816,10 +898,19 @@ showModes();
 		}
 		if (m.gpuLost) {
 			console.warn('[GPU lost]', m.gpuLost);
-			hud.textContent = 'Memória gráfica ajustada (' + m.gpuLost + ').';
-			if (!location.search.includes('low=1')) {
-				setTimeout(() => { location.href = location.pathname + '?low=1&scale=0.55&res=640x360'; }, 1500);
+			const el = document.getElementById('hud');
+			if (el) {
+				el.innerHTML = '<div style="background:rgba(20,20,20,0.95);border:1.5px solid #00bcd4;color:#eee;padding:14px;border-radius:10px;pointer-events:auto;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,0.8);">' +
+					'<b style="color:#00bcd4;font-size:14px;">⚡ Memória Gráfica Reiniciada</b>' +
+					'<p style="font-size:12px;margin:8px 0;line-height:1.4;">O WebGPU do seu celular reiniciou para evitar travamentos. Entrando em modo ultra-estável...</p>' +
+					'<button id="btn-gpu-reload" style="background:#00bcd4;color:#000;border:none;padding:9px 16px;border-radius:6px;font-weight:bold;cursor:pointer;width:100%;">Entrar na Gameplay Agora</button>' +
+					'</div>';
+				const b = document.getElementById('btn-gpu-reload');
+				if (b) b.onclick = () => { location.href = location.pathname + '?low=1&fixed=1&scale=0.65&fps=30&newgame=1'; };
 			}
+			setTimeout(() => {
+				location.href = location.pathname + '?low=1&fixed=1&scale=0.65&fps=30&newgame=1';
+			}, 2500);
 			return;
 		}
 		if (m.error) { label.textContent = m.error; label.style.color = '#e66'; return; }
@@ -829,8 +920,8 @@ showModes();
 		if (m.compiling !== undefined && !waitingChoice) { label.textContent = lastLabel = 'Preparing shaders'; target = Math.max(target, 99); }		// the world is up; the GPU worker holds it until its pipelines are compiled
 		if (m.world) {
 			ready = true;
-			hud.textContent = 'click the game to capture the mouse (Esc releases it, Shift+P switches keyboard mode, = shows FPS)';
-			setTimeout(() => { hud.textContent = ''; }, 15000);
+			hud.textContent = 'Toque na tela para jogar';
+			setTimeout(() => { hud.textContent = ''; }, 10000);
 			dismissLoading();
 		}
 	};
@@ -894,7 +985,7 @@ showModes();
 		}
 		fill.style.width = shown.toFixed(1) + '%';
 		pct.textContent = Math.round(shown) + '%';
-		if (ready || shown > 99.5) { dismissLoading(); }
+		if (ready || shown > 99.5 || (audioStarted && shown >= 80)) { dismissLoading(); }
 	}, 50);
 }
 const hud = document.getElementById('hud');
@@ -1003,10 +1094,11 @@ const worker = new Worker(BASE + '/loader.js');
 		if (ev.data.audio) { audioPending = ev.data.audio; tryStartAudio(); }
 	};
 	worker.onerror = (e) => { hud.textContent = 'worker error: ' + e.message; };
+	const frameLimitVal = (q.get('fps') === '30' || (isMobile && !q.get('fps'))) ? 2 : (q.get('fps') === '0' ? 0 : 1);
 	worker.postMessage({
 		canvas: offscreen,
 		base: BASE,
-		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
+		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + frameLimitVal,		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
 		 ...(cores <= 2 ? ['-numCores=' + cores] : []), ...(lowMemory ? LOW_ARGS : []), ...(q.get('args') || '').split(',').filter(Boolean)],
 		shotEvery: +(q.get('shot') || 0),
 		shotRt: q.get('shotrt') === '1',		// ?shotrt=1 (with ?shot=N): every render target of one frame after the world is shown to the dev server's shots/ (wgpu_worker.js)
@@ -1113,7 +1205,7 @@ function installInput(memory, block) {
 	startModeWord = new Int32Array(memory.buffer, block + 440, 1);		// startMode (the start menu above)
 	if (startMode) Atomics.store(startModeWord, 0, startMode);
 	Atomics.store(ext, 2, W); Atomics.store(ext, 3, H);
-	if (!q.get('fixed')) {
+	if (!q.get('fixed') && !isMobile) {
 		let timer = 0;
 		addEventListener('resize', () => {
 			clearTimeout(timer);
@@ -1339,11 +1431,7 @@ function initTouchControls(keys, w, VK, U16) {
 	if (settingsBtn) {
 		settingsBtn.addEventListener('click', (e) => {
 			e.preventDefault(); e.stopPropagation();
-			if (!document.fullscreenElement) {
-				document.documentElement.requestFullscreen().catch(() => {});
-			} else {
-				document.exitFullscreen().catch(() => {});
-			}
+			toggleSettingsModal();
 		});
 	}
 
@@ -1580,6 +1668,131 @@ window.addEventListener('appinstalled', () => {
 	if (installApkBtn) installApkBtn.style.display = 'none';
 	if (apkModal) apkModal.style.display = 'none';
 });
+
+// ==== SISTEMA DE CONFIGURAÇÕES E OTIMIZAÇÃO (FLAGS OFICIAIS GTA V) ====
+const settingsModal = document.getElementById('settings-modal');
+const closeSettingsModalBtn = document.getElementById('btn-close-settings-modal');
+const topSettingsBtn = document.getElementById('btn-settings-top');
+
+function toggleSettingsModal(open) {
+	if (!settingsModal) return;
+	const show = open !== undefined ? open : settingsModal.style.display !== 'flex';
+	settingsModal.style.display = show ? 'flex' : 'none';
+	if (show) syncSettingsFields();
+}
+window.toggleSettingsModal = toggleSettingsModal;
+
+if (closeSettingsModalBtn) {
+	closeSettingsModalBtn.addEventListener('click', () => toggleSettingsModal(false));
+}
+if (topSettingsBtn) {
+	topSettingsBtn.addEventListener('click', (e) => {
+		e.preventDefault(); e.stopPropagation();
+		toggleSettingsModal();
+	});
+}
+
+function syncSettingsFields() {
+	const params = new URLSearchParams(location.search);
+	const lowSel = document.getElementById('cfg-low');
+	const shadowsSel = document.getElementById('cfg-shadows');
+	const fpsSel = document.getElementById('cfg-fps');
+	const scaleSel = document.getElementById('cfg-scale');
+	const modeSel = document.getElementById('cfg-mode');
+	const fixedChk = document.getElementById('cfg-fixed');
+
+	const isMob = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || ('ontouchstart' in window);
+
+	if (lowSel) lowSel.value = params.get('low') ?? (isMob ? '1' : '0');
+	if (shadowsSel) shadowsSel.value = params.get('shadows') ?? '0';
+	if (fpsSel) fpsSel.value = params.get('fps') ?? (isMob ? '30' : '60');
+	if (scaleSel) scaleSel.value = params.get('scale') ?? (isMob ? '0.75' : '1.0');
+	if (fixedChk) fixedChk.checked = params.get('fixed') !== '0';
+
+	if (modeSel) {
+		if (params.get('newgame') === '1') {
+			modeSel.value = 'newgame';
+		} else if (params.get('mode') === 'sandbox') {
+			modeSel.value = params.get('map') === 'env_test' ? 'sandbox_envtest' : 'sandbox_gtav';
+		} else {
+			modeSel.value = 'story';
+		}
+	}
+}
+
+// Botões de Presets Rápidos
+document.querySelectorAll('.opt-preset-btn').forEach(btn => {
+	btn.addEventListener('click', (e) => {
+		e.preventDefault();
+		const preset = btn.dataset.preset;
+		const next = new URLSearchParams();
+		if (preset === 'smooth') {
+			next.set('low', '1');
+			next.set('scale', '0.75');
+			next.set('fixed', '1');
+			next.set('fps', '60');
+		} else if (preset === 'battery') {
+			next.set('low', '1');
+			next.set('shadows', '1');
+			next.set('fps', '30');
+			next.set('scale', '0.75');
+			next.set('fixed', '1');
+		} else if (preset === 'prologue') {
+			next.set('newgame', '1');
+			next.set('low', '1');
+			next.set('scale', '0.75');
+			next.set('fixed', '1');
+			next.set('fps', '60');
+		} else if (preset === 'sandbox') {
+			next.set('mode', 'sandbox');
+			next.set('map', 'env_test');
+			next.set('low', '1');
+			next.set('scale', '0.75');
+			next.set('fixed', '1');
+			next.set('fps', '60');
+		}
+		location.search = '?' + next.toString();
+	});
+});
+
+// Botão Salvar e Aplicar
+const applySettingsBtn = document.getElementById('btn-apply-settings');
+if (applySettingsBtn) {
+	applySettingsBtn.addEventListener('click', (e) => {
+		e.preventDefault();
+		const lowVal = document.getElementById('cfg-low')?.value || '1';
+		const shadowsVal = document.getElementById('cfg-shadows')?.value || '0';
+		const fpsVal = document.getElementById('cfg-fps')?.value || '60';
+		const scaleVal = document.getElementById('cfg-scale')?.value || '0.75';
+		const modeVal = document.getElementById('cfg-mode')?.value || 'story';
+		const fixedVal = document.getElementById('cfg-fixed')?.checked;
+
+		const next = new URLSearchParams(location.search);
+		next.set('low', lowVal);
+		if (shadowsVal === '1') next.set('shadows', '1'); else next.delete('shadows');
+		if (fpsVal !== '60') next.set('fps', fpsVal); else next.delete('fps');
+		next.set('scale', scaleVal);
+		if (fixedVal) next.set('fixed', '1'); else next.delete('fixed');
+
+		next.delete('mode');
+		next.delete('map');
+		next.delete('newgame');
+
+		if (modeVal === 'newgame') {
+			next.set('mode', 'story');
+			next.set('newgame', '1');
+		} else if (modeVal === 'sandbox_gtav') {
+			next.set('mode', 'sandbox');
+		} else if (modeVal === 'sandbox_envtest') {
+			next.set('mode', 'sandbox');
+			next.set('map', 'env_test');
+		} else {
+			next.set('mode', 'story');
+		}
+
+		location.search = '?' + next.toString();
+	});
+}
 </script>
 </body>
 </html>

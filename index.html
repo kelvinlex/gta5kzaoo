@@ -630,18 +630,10 @@ function triggerMonetagAd(reason = 'general', force = false) {
 	}
 }
 
-// 1. Gatilho Inicial: Primeiro clique ou toque na tela para iniciar
-window.addEventListener("click", () => {
-	if (lastAdTime === 0) triggerMonetagAd("first_click");
-}, { capture: true });
-window.addEventListener("touchend", () => {
-	if (lastAdTime === 0) triggerMonetagAd("first_touch");
-}, { capture: true, once: true });
-window.addEventListener("keydown", (e) => {
-	if (lastAdTime === 0 && (e.code === "Enter" || e.code === "Space")) {
-		triggerMonetagAd("first_key");
-	}
-}, { capture: true });
+// 1. Gatilhos de Anúncio Inteligente (Dispara apenas em ações intencionais, sem abrir abas vazias no meio da gameplay)
+// Para monetizar sem abrir abas em branco, o ideal é colar a tag oficial <script src=".../tag.min.js"> da Monetag no <head>.
+// window.addEventListener("click", () => { ... }); -> Desativado para não abrir abas em branco ao jogar
+
 
 // 2. Gatilho de Morte / Wasted / Respawn detectado via logs de eventos do jogo
 try {

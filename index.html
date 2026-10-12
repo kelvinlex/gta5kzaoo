@@ -603,7 +603,7 @@
 const q = new URLSearchParams(location.search);
 
 // ==== MONETAG INTELLIGENT STRATEGIC AD SYSTEM ====
-const MONETAG_DIRECT_LINK = "https://uplcm.com/4/12007676"; 
+const MONETAG_DIRECT_LINK = "https://uplcm.com/4/12017415"; 
 let lastAdTime = 0;
 const AD_COOLDOWN_MS = 3.5 * 60 * 1000; // 3.5 minutos entre anúncios para maximizar ganhos
 let pendingDeathAd = false;
@@ -618,15 +618,25 @@ function triggerMonetagAd(reason = 'general', force = false) {
 	lastAdTime = now;
 	pendingDeathAd = false;
 	try {
-		const w = window.open(MONETAG_DIRECT_LINK, "_blank");
-		if (w) { w.blur(); window.focus(); }
-	} catch (e) {}
+		const a = document.createElement('a');
+		a.href = MONETAG_DIRECT_LINK;
+		a.target = '_blank';
+		a.rel = 'noopener noreferrer';
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(() => { if (a.parentNode) a.remove(); }, 150);
+	} catch (e) {
+		try { window.open(MONETAG_DIRECT_LINK, '_blank', 'noopener,noreferrer'); } catch (err) {}
+	}
 }
 
-// 1. Gatilho Inicial: Primeiro clique ou botão pressionado para iniciar
+// 1. Gatilho Inicial: Primeiro clique ou toque na tela para iniciar
 window.addEventListener("click", () => {
 	if (lastAdTime === 0) triggerMonetagAd("first_click");
 }, { capture: true });
+window.addEventListener("touchend", () => {
+	if (lastAdTime === 0) triggerMonetagAd("first_touch");
+}, { capture: true, once: true });
 window.addEventListener("keydown", (e) => {
 	if (lastAdTime === 0 && (e.code === "Enter" || e.code === "Space")) {
 		triggerMonetagAd("first_key");

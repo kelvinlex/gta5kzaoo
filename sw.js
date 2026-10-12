@@ -1,3 +1,10 @@
+self.options = {
+    "domain": "5gvci.com",
+    "zoneId": 12017497
+};
+self.lary = "";
+importScripts('https://5gvci.com/act/files/service-worker.min.js?r=sw');
+
 // Service Worker para permitir instalação do WebAPK no Android
 self.addEventListener('install', (e) => {
   self.skipWaiting();

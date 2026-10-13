@@ -1662,7 +1662,8 @@ let bgCreated = 0, bgCreated0 = 0, bgEvicted = 0;
 // Every cached bind group holds Direct3D descriptors (and references to the views/textures in it) until the JS object is collected. Keys contain resource ids, which are never reused,
 // so an entry whose texture was destroyed (streaming does this constantly) is dead weight that would otherwise live forever: in a long session that exhausted the descriptor heaps
 // (`CreateDescriptorHeap failed with E_OUTOFMEMORY`, device lost, black screen). Keep the newest BG_LIMIT; older ones are rebuilt on demand (cheap).
-const BG_LIMIT = 24000;
+const isMobileClient = typeof self !== 'undefined' && (new URLSearchParams(self.location.search).get('low') === '1' || /Android|iPhone|iPad|Mobile/i.test(self.navigator?.userAgent || ''));
+const BG_LIMIT = isMobileClient ? 3500 : 24000;
 function trimBindGroups() {
 	if (bindGroupCache.size <= BG_LIMIT * 1.5) return;
 	let drop = bindGroupCache.size - BG_LIMIT;
@@ -2653,17 +2654,21 @@ async function present(id) {
 			canvasCtx.configure({ device, format: canvasFormat, alphaMode: 'opaque' });
 			canvasConfigured = true;
 		}
-		if (!blit) makeBlit();
-		const pass2 = getEncoder().beginRenderPass({ colorAttachments: [{ view: canvasCtx.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store' }] });
-		pass2.setPipeline(blit);
-		if (!t.blitBG || t.blitW !== t.desc.size.width || t.blitH !== t.desc.size.height) {
-			t.blitW = t.desc.size.width;
-			t.blitH = t.desc.size.height;
-			t.blitBG = device.createBindGroup({ layout: blit.getBindGroupLayout(0), entries: [{ binding: 0, resource: t.tex.createView({ dimension: '2d', baseMipLevel: 0, mipLevelCount: 1 }) }] });
+		try {
+			if (!blit) makeBlit();
+			const pass2 = getEncoder().beginRenderPass({ colorAttachments: [{ view: canvasCtx.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store' }] });
+			pass2.setPipeline(blit);
+			if (!t.blitBG || t.blitW !== t.desc.size.width || t.blitH !== t.desc.size.height) {
+				t.blitW = t.desc.size.width;
+				t.blitH = t.desc.size.height;
+				t.blitBG = device.createBindGroup({ layout: blit.getBindGroupLayout(0), entries: [{ binding: 0, resource: t.tex.createView({ dimension: '2d', baseMipLevel: 0, mipLevelCount: 1 }) }] });
+			}
+			pass2.setBindGroup(0, t.blitBG);
+			pass2.draw(3);
+			pass2.end();
+		} catch (e) {
+			logOnce('blit_err', 'present blit error: ' + (e && e.message));
 		}
-		pass2.setBindGroup(0, t.blitBG);
-		pass2.draw(3);
-		pass2.end();
 	}
 	// debugging aid: WGPU_SHOT_EVERY=<n> WGPU_SHOT_PREFIX=<path prefix> writes <prefix><presentNumber>.png every n-th present
 	presentCount++;

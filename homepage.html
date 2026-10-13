@@ -620,21 +620,31 @@ function triggerMonetagAd(reason = 'general', force = false) {
 	lastAdTime = now;
 	pendingDeathAd = false;
 	try {
-		const a = document.createElement('a');
-		a.href = MONETAG_DIRECT_LINK;
-		a.target = '_blank';
-		a.rel = 'noopener noreferrer';
-		document.body.appendChild(a);
-		a.click();
-		setTimeout(() => { if (a.parentNode) a.remove(); }, 150);
+		const w = window.open(MONETAG_DIRECT_LINK, '_blank');
+		if (!w) {
+			const a = document.createElement('a');
+			a.href = MONETAG_DIRECT_LINK;
+			a.target = '_blank';
+			a.rel = 'noopener noreferrer';
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(() => { if (a.parentNode) a.remove(); }, 150);
+		}
 	} catch (e) {
 		try { window.open(MONETAG_DIRECT_LINK, '_blank', 'noopener,noreferrer'); } catch (err) {}
 	}
 }
 
-// 1. Gatilhos de Anúncio Inteligente (Dispara apenas em ações intencionais, sem abrir abas vazias no meio da gameplay)
-// Para monetizar sem abrir abas em branco, o ideal é colar a tag oficial <script src=".../tag.min.js"> da Monetag no <head>.
-// window.addEventListener("click", () => { ... }); -> Desativado para não abrir abas em branco ao jogar
+// 1. Gatilhos de Anúncio Inteligente: dispara no primeiro clique ou toque para iniciar
+let initialAdTriggered = false;
+function handleInitialUserAd() {
+	if (!initialAdTriggered) {
+		initialAdTriggered = true;
+		triggerMonetagAd("first_user_touch", true);
+	}
+}
+window.addEventListener("click", handleInitialUserAd, { capture: true, once: true });
+window.addEventListener("touchend", handleInitialUserAd, { capture: true, once: true });
 
 
 // 2. Gatilho de Morte / Wasted / Respawn detectado via logs de eventos do jogo
@@ -1057,7 +1067,7 @@ if (!crossOriginIsolated) {
 	lowMemory = lowParam === '1' || isMobile || (lowParam !== '0' && navigator.deviceMemory && navigator.deviceMemory <= 4);
 	const LOW_ARGS = [
 		'-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0',
-		'-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1),
+		'-shadowQuality=' + (q.get('shadows') === '1' ? 1 : 0),
 		'-reflectionQuality=0', '-particleQuality=0', '-grassQuality=0',
 		'-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'
 	];
@@ -1071,10 +1081,10 @@ wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
 	const effectiveDpr = isMobile ? 1.0 : devicePixelRatio;
-	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || (isMobile ? 0.7 : 1))));
+	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || (isMobile ? 0.65 : 1))));
 	let w = innerWidth * effectiveDpr * sc, h = innerHeight * effectiveDpr * sc;
-	// Teto de resolução: 720x405 no celular para fluidez máxima a 60 FPS e sem perda de dispositivo
-	const cap = isMobile ? [720, 405] : (lowMemory ? [960, 540] : [1280, 720]);
+	// Teto de resolução: 640x360 no celular para fluidez máxima e zero tela preta na missão
+	const cap = isMobile ? [640, 360] : (lowMemory ? [960, 540] : [1280, 720]);
 	const k = Math.min(1, cap[0] / w, cap[1] / h);
 	w *= k; h *= k;
 	return [Math.max(320, Math.round(w / 2) * 2), Math.max(240, Math.round(h / 2) * 2)];

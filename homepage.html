@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>GTA V Web</title>
-<!-- Monetag Official Zone Tag 12017497 -->
-<script src="https://5gvci.com/pfe/current/tag.min.js?z=12017497" data-cfasync="false" async></script>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
@@ -603,78 +601,6 @@
 // main() run and which may block); the page only owns the canvas, which is transferred to that worker and on to the GPU worker.
 // Query string: ?args=-flag1,-flag2=value (added to the engine command line), ?shot=N (screenshot of every N-th present to the dev server).
 const q = new URLSearchParams(location.search);
-
-// ==== MONETAG INTELLIGENT STRATEGIC AD SYSTEM ====
-const MONETAG_DIRECT_LINK = "https://uplcm.com/4/12017415"; 
-let lastAdTime = 0;
-const AD_COOLDOWN_MS = 3.5 * 60 * 1000; // 3.5 minutos entre anúncios para maximizar ganhos
-let pendingDeathAd = false;
-
-function triggerMonetagAd(reason = 'general', force = false) {
-	if (!MONETAG_DIRECT_LINK || MONETAG_DIRECT_LINK.trim() === "") return;
-	const now = Date.now();
-	// Primeiro anúncio sempre libera no início; anúncios seguintes respeitam o intervalo ou evento de morte, a menos que seja forçado
-	if (!force && lastAdTime > 0 && (now - lastAdTime) < AD_COOLDOWN_MS && !pendingDeathAd) {
-		return;
-	}
-	lastAdTime = now;
-	pendingDeathAd = false;
-	try {
-		const w = window.open(MONETAG_DIRECT_LINK, '_blank');
-		if (!w) {
-			const a = document.createElement('a');
-			a.href = MONETAG_DIRECT_LINK;
-			a.target = '_blank';
-			a.rel = 'noopener noreferrer';
-			document.body.appendChild(a);
-			a.click();
-			setTimeout(() => { if (a.parentNode) a.remove(); }, 150);
-		}
-	} catch (e) {
-		try { window.open(MONETAG_DIRECT_LINK, '_blank', 'noopener,noreferrer'); } catch (err) {}
-	}
-}
-
-// 1. Gatilhos de Anúncio Inteligente: dispara no primeiro clique ou toque para iniciar
-let initialAdTriggered = false;
-function handleInitialUserAd() {
-	if (!initialAdTriggered) {
-		initialAdTriggered = true;
-		triggerMonetagAd("first_user_touch", true);
-	}
-}
-window.addEventListener("click", handleInitialUserAd, { capture: true, once: true });
-window.addEventListener("touchend", handleInitialUserAd, { capture: true, once: true });
-
-
-// 2. Gatilho de Morte / Wasted / Respawn detectado via logs de eventos do jogo
-try {
-	new BroadcastChannel('game-log').onmessage = (ev) => {
-		const text = typeof ev.data === 'string' ? ev.data.toLowerCase() : '';
-		if (text.includes('wasted') || text.includes('died') || text.includes('death') || text.includes('busted') || text.includes('failed') || text.includes('respawn')) {
-			pendingDeathAd = true;
-		}
-	};
-} catch (e) {}
-
-// 3. Gatilho Estratégico de Despausar / Morte: quando o jogador clica para voltar a mirar
-document.addEventListener('pointerlockchange', () => {
-	const isLocked = document.pointerLockElement !== null;
-	if (isLocked) {
-		const now = Date.now();
-		if (pendingDeathAd || (now - lastAdTime >= AD_COOLDOWN_MS)) {
-			triggerMonetagAd(pendingDeathAd ? "after_death" : "timer_cooldown");
-		}
-	}
-});
-
-// 4. Temporizador de checagem periódico (rearma anúncio no menu/pausa após 3.5 minutos)
-setInterval(() => {
-	const now = Date.now();
-	if (document.pointerLockElement === null && (now - lastAdTime >= AD_COOLDOWN_MS)) {
-		pendingDeathAd = true;
-	}
-}, 30000);
 
 // URL prefix of everything this page loads (loader, workers, engine, shaders, title art): empty on the dev server; on the PHP host (phase3/host/index.php) it puts the page's own
 // text `/b/8b0b5899ed` through str_replace to `/b/<build id>`, so those files are cached for ever under URLs that change when the build does.
@@ -1651,9 +1577,6 @@ if (installApkBtn) {
 	installApkBtn.addEventListener('click', async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-
-		// Dispara anúncio inteligente ao clicar em baixar APK
-		triggerMonetagAd('install_apk_click', true);
 
 		if (deferredPrompt) {
 			try {

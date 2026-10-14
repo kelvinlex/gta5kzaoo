@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>GTA V Web</title>
+<script>
+// Auto-ativação de Cross-Origin Isolation (COOP/COEP) para GitHub Pages, Vercel e Web
+if (!window.crossOriginIsolated && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    reg.addEventListener('updatefound', () => { window.location.reload(); });
+    if (reg.active && !navigator.serviceWorker.controller) {
+      window.location.reload();
+    }
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+</script>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
@@ -978,8 +992,18 @@ async function dropOldCache() {
 let lowMemory = false;		// set below (module scope: the ?mem readout further down also needs it)
 let startSize = [1280, 720], wantSize = null;		// set below (module scope: installInput uses them)
 if (!crossOriginIsolated) {
-	document.getElementById('label').textContent = 'Erro de isolamento de origem. Recarregue a página com HTTPS ativo.';
-	document.getElementById('label').style.color = '#e66';
+	if (location.protocol === 'file:') {
+		document.getElementById('label').textContent = 'Para jogar no PC, execute o arquivo Iniciar_GTA_Web.bat (o navegador bloqueia dois cliques em arquivo local).';
+		document.getElementById('label').style.color = '#ff4444';
+	} else {
+		document.getElementById('label').textContent = 'Configurando isolamento seguro... Recarregando página automaticamente...';
+		document.getElementById('label').style.color = '#ffaa00';
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('sw.js').then((reg) => {
+				setTimeout(() => { if (!window.crossOriginIsolated) window.location.reload(); }, 1200);
+			}).catch(() => {});
+		}
+	}
 } else if (!navigator.gpu) {
 	document.getElementById('label').textContent = 'WebGPU não detectado neste navegador. No celular, utilize o Google Chrome atualizado.';
 	document.getElementById('label').style.color = '#ff9800';
@@ -1558,7 +1582,7 @@ function initTouchControls(keys, w, VK, U16) {
 // ==== SISTEMA DE INSTALAÇÃO DE APK / PWA & SERVICE WORKER ====
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/sw.js').catch(() => {});
+		navigator.serviceWorker.register('sw.js').catch(() => {});
 	});
 }
 

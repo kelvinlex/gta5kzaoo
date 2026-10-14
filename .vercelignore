@@ -1,0 +1,11 @@
+# Arquivos ignorados no deploy da Vercel (economiza banda e acelera o deploy)
+runtime/
+snapshot/
+.cache/
+__pycache__/
+*.py
+*.bat
+*.cmd
+*.ps1
+*.md
+headers.txt

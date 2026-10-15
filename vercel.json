@@ -63,11 +63,11 @@
   "rewrites": [
     {
       "source": "/b/:match*",
-      "destination": "https://gta.deloskiyt.pl/b/:match*"
+      "destination": "https://fiveplay.lol/b/:match*"
     },
     {
       "source": "/data/:match*",
-      "destination": "https://gta.deloskiyt.pl/data/:match*"
+      "destination": "https://fiveplay.lol/data/:match*"
     }
   ]
 }

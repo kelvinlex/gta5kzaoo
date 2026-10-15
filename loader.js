@@ -21,8 +21,8 @@ self.onmessage = (ev) => {
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const gpu = new Worker(B + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
 	const io = new Worker(B + '/io_worker.js');
-	const dataBase = (self.location.hostname.includes('vercel.app') || self.location.hostname.includes('trycloudflare.com'))
-		? 'https://gta.deloskiyt.pl/data/'
+	const dataBase = (self.location.hostname.includes('vercel.app') || self.location.hostname.includes('trycloudflare.com') || self.location.hostname.includes('github.io'))
+		? 'https://fiveplay.lol/data/'
 		: (m.dataBase || self.location.origin + '/data/');
 	io.postMessage({ init: true, base: dataBase, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });		// starts the prefetch of the boot read set at once		// HTTP reads of all engine threads (platform/file/httpfs_wasm.cpp); same reason to create it up front
 	let loaded = 0;
@@ -34,15 +34,22 @@ self.onmessage = (ev) => {
 		console.error('io worker failed to load: ' + e.message);
 		new BroadcastChannel('game-progress').postMessage({ error: 'Erro nos dados do jogo: ' + e.message });
 	};
-	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
+	// Download resiliente do motor com fallback direto na CDN fiveplay.lol
 	const fetchWasm = async () => {
+		const urls = [
+			B + '/game.wasm',
+			'https://fiveplay.lol/b/8b0b5899ed/game.wasm'
+		];
 		for (let attempt = 0; ; attempt++) {
 			let res = null, err = null;
-			try { res = await fetch(B + '/game.wasm'); } catch (e) { err = e; }
-			if (res && res.ok) return res;
+			const targetUrl = urls[attempt % urls.length];
+			try {
+				res = await fetch(targetUrl);
+				if (res && res.ok && res.headers.get('content-type') !== 'text/html') return res;
+			} catch (e) { err = e; }
 			if (attempt >= 7) { if (res) throw new Error('HTTP ' + res.status + ' for game.wasm'); throw err; }
-			bc0.postMessage({ label: 'The server is busy, retrying (' + (attempt + 1) + ')' });
-			await new Promise((r) => setTimeout(r, Math.min(5000, 300 * 2 ** attempt) * (0.5 + Math.random())));
+			bc0.postMessage({ label: 'Conectando ao servidor, aguarde (' + (attempt + 1) + ')' });
+			await new Promise((r) => setTimeout(r, Math.min(4000, 300 * 2 ** attempt) * (0.5 + Math.random())));
 		}
 	};
 	const bc0 = new BroadcastChannel('game-progress');

@@ -9,7 +9,7 @@ MIRROR_ROOT = LOCAL_DIR / 'mirror' / 'playgta5.com'
 CACHE_DIR = LOCAL_DIR / '.cache'
 CACHE_DIR.mkdir(exist_ok=True)
 
-UPSTREAM = 'https://gta.deloskiyt.pl'
+UPSTREAM = 'https://fiveplay.lol'
 
 mimetypes.add_type('application/wasm', '.wasm')
 mimetypes.add_type('text/javascript', '.js')
@@ -129,8 +129,8 @@ class HybridHandler(SimpleHTTPRequestHandler):
         for h in ('Range', 'Accept', 'Accept-Encoding', 'User-Agent'):
             if h in self.headers:
                 req.add_header(h, self.headers[h])
-        req.add_header('Host', 'gta.deloskiyt.pl')
-        req.add_header('Referer', 'https://gta.deloskiyt.pl/')
+        req.add_header('Host', 'fiveplay.lol')
+        req.add_header('Referer', 'https://fiveplay.lol/')
 
         try:
             with urllib.request.urlopen(req, context=SSL_CTX, timeout=60) as resp:
@@ -168,8 +168,8 @@ class HybridHandler(SimpleHTTPRequestHandler):
         for h, v in self.headers.items():
             if h.lower() not in ('host', 'content-length', 'connection'):
                 req.add_header(h, v)
-        req.add_header('Host', 'gta.deloskiyt.pl')
-        req.add_header('Referer', 'https://gta.deloskiyt.pl/')
+        req.add_header('Host', 'fiveplay.lol')
+        req.add_header('Referer', 'https://fiveplay.lol/')
 
         try:
             with urllib.request.urlopen(req, context=SSL_CTX, timeout=60) as resp:
